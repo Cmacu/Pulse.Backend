@@ -88,7 +88,7 @@ namespace Pulse.Core.Services
 
         private async Task<Response> Send(EmailAddress to, string subject, string body)
         {
-            _context.EmailLogs.Add(new EmailLog()
+            _context.EmailLog.Add(new EmailLog()
             {
                 Timestamp = DateTime.UtcNow,
                     To = to.Email,

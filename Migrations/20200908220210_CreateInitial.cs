@@ -9,7 +9,7 @@ namespace Pulse.Backend.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AppErrors",
+                name: "AppError",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -20,11 +20,11 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppErrors", x => x.Id);
+                    table.PrimaryKey("PK_AppError", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "EmailLogs",
+                name: "EmailLog",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -36,11 +36,11 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmailLogs", x => x.Id);
+                    table.PrimaryKey("PK_EmailLog", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Matches",
+                name: "Matche",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -53,11 +53,29 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Matches", x => x.Id);
+                    table.PrimaryKey("PK_Matche", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MatchmakerLogAggregates",
+                name: "MatchmakerLog",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                    PlayerId = table.Column<int>(nullable: false),
+                    AddedAt = table.Column<DateTime>(nullable: false),
+                    Rating = table.Column<double>(nullable: false),
+                    RecentOpponents = table.Column<string>(nullable: true),
+                    ExpiredAt = table.Column<DateTime>(nullable: true),
+                    MatchId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MatchmakerLog", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MatchmakerLogAggregate",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -73,11 +91,11 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MatchmakerLogAggregates", x => x.Id);
+                    table.PrimaryKey("PK_MatchmakerLogAggregate", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MatchmakerLogCounters",
+                name: "MatchmakerLogCounter",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -93,29 +111,11 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MatchmakerLogCounters", x => x.Id);
+                    table.PrimaryKey("PK_MatchmakerLogCounter", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MatchmakerLogs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    PlayerId = table.Column<int>(nullable: false),
-                    AddedAt = table.Column<DateTime>(nullable: false),
-                    Rating = table.Column<double>(nullable: false),
-                    RecentOpponents = table.Column<string>(nullable: true),
-                    ExpiredAt = table.Column<DateTime>(nullable: true),
-                    MatchId = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MatchmakerLogs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Players",
+                name: "Player",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -133,11 +133,11 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Players", x => x.Id);
+                    table.PrimaryKey("PK_Player", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LeaderboardLogs",
+                name: "LeaderboardLog",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -152,17 +152,17 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LeaderboardLogs", x => x.Id);
+                    table.PrimaryKey("PK_LeaderboardLog", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LeaderboardLogs_Players_PlayerId",
+                        name: "FK_LeaderboardLog_Player_PlayerId",
                         column: x => x.PlayerId,
-                        principalTable: "Players",
+                        principalTable: "Player",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MatchPlayers",
+                name: "MatchPlayer",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -183,23 +183,23 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MatchPlayers", x => x.Id);
+                    table.PrimaryKey("PK_MatchPlayer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MatchPlayers_Matches_MatchId",
+                        name: "FK_MatchPlayer_Matche_MatchId",
                         column: x => x.MatchId,
-                        principalTable: "Matches",
+                        principalTable: "Matche",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MatchPlayers_Players_PlayerId",
+                        name: "FK_MatchPlayer_Player_PlayerId",
                         column: x => x.PlayerId,
-                        principalTable: "Players",
+                        principalTable: "Player",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlayerBadges",
+                name: "PlayerBadge",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -211,17 +211,17 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlayerBadges", x => x.Id);
+                    table.PrimaryKey("PK_PlayerBadge", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlayerBadges_Players_PlayerId",
+                        name: "FK_PlayerBadge_Player_PlayerId",
                         column: x => x.PlayerId,
-                        principalTable: "Players",
+                        principalTable: "Player",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlayerSessions",
+                name: "PlayerSession",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -235,17 +235,17 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlayerSessions", x => x.Id);
+                    table.PrimaryKey("PK_PlayerSession", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlayerSessions_Players_PlayerId",
+                        name: "FK_PlayerSession_Player_PlayerId",
                         column: x => x.PlayerId,
-                        principalTable: "Players",
+                        principalTable: "Player",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "PlayerSettings",
+                name: "PlayerSetting",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -258,106 +258,106 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlayerSettings", x => x.Id);
+                    table.PrimaryKey("PK_PlayerSetting", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PlayerSettings_Players_PlayerId",
+                        name: "FK_PlayerSetting_Player_PlayerId",
                         column: x => x.PlayerId,
-                        principalTable: "Players",
+                        principalTable: "Player",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_LeaderboardLogs_CreatedAt",
-                table: "LeaderboardLogs",
+                name: "IX_LeaderboardLog_CreatedAt",
+                table: "LeaderboardLog",
                 column: "CreatedAt");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LeaderboardLogs_PlayerId",
-                table: "LeaderboardLogs",
+                name: "IX_LeaderboardLog_PlayerId",
+                table: "LeaderboardLog",
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LeaderboardLogs_CreatedAt_PlayerId",
-                table: "LeaderboardLogs",
+                name: "IX_LeaderboardLog_CreatedAt_PlayerId",
+                table: "LeaderboardLog",
                 columns: new[] { "CreatedAt", "PlayerId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MatchmakerLogAggregates_From",
-                table: "MatchmakerLogAggregates",
+                name: "IX_MatchmakerLogAggregate_From",
+                table: "MatchmakerLogAggregate",
                 column: "From",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MatchmakerLogCounters_From",
-                table: "MatchmakerLogCounters",
+                name: "IX_MatchmakerLogCounter_From",
+                table: "MatchmakerLogCounter",
                 column: "From",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MatchPlayers_MatchId",
-                table: "MatchPlayers",
+                name: "IX_MatchPlayer_MatchId",
+                table: "MatchPlayer",
                 column: "MatchId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MatchPlayers_PlayerId",
-                table: "MatchPlayers",
+                name: "IX_MatchPlayer_PlayerId",
+                table: "MatchPlayer",
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerBadges_PlayerId",
-                table: "PlayerBadges",
+                name: "IX_PlayerBadge_PlayerId",
+                table: "PlayerBadge",
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerSessions_PlayerId",
-                table: "PlayerSessions",
+                name: "IX_PlayerSession_PlayerId",
+                table: "PlayerSession",
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlayerSettings_PlayerId",
-                table: "PlayerSettings",
+                name: "IX_PlayerSetting_PlayerId",
+                table: "PlayerSetting",
                 column: "PlayerId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AppErrors");
+                name: "AppError");
 
             migrationBuilder.DropTable(
-                name: "EmailLogs");
+                name: "EmailLog");
 
             migrationBuilder.DropTable(
-                name: "LeaderboardLogs");
+                name: "LeaderboardLog");
 
             migrationBuilder.DropTable(
-                name: "MatchmakerLogAggregates");
+                name: "MatchmakerLog");
 
             migrationBuilder.DropTable(
-                name: "MatchmakerLogCounters");
+                name: "MatchmakerLogAggregate");
 
             migrationBuilder.DropTable(
-                name: "MatchmakerLogs");
+                name: "MatchmakerLogCounter");
 
             migrationBuilder.DropTable(
-                name: "MatchPlayers");
+                name: "MatchPlayer");
 
             migrationBuilder.DropTable(
-                name: "PlayerBadges");
+                name: "PlayerBadge");
 
             migrationBuilder.DropTable(
-                name: "PlayerSessions");
+                name: "PlayerSession");
 
             migrationBuilder.DropTable(
-                name: "PlayerSettings");
+                name: "PlayerSetting");
 
             migrationBuilder.DropTable(
-                name: "Matches");
+                name: "Matche");
 
             migrationBuilder.DropTable(
-                name: "Players");
+                name: "Player");
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Pulse.Core.Services
 
         public AuthModel Authenticate(string token, string refreshToken, string ipAddress)
         {
-            var session = _context.PlayerSessions.Include(x => x.Player).Where(x => x.RefreshToken == refreshToken).FirstOrDefault();
+            var session = _context.PlayerSession.Include(x => x.Player).Where(x => x.RefreshToken == refreshToken).FirstOrDefault();
             // Generate and save app JWT token
             var claims = new List<Claim>()
             {
@@ -80,7 +80,7 @@ namespace Pulse.Core.Services
                 throw new SecurityTokenException("Invalid access token");
 
             var playerId = int.Parse(principal.FindFirst(ClaimTypes.NameIdentifier).Value);
-            var auth = _context.PlayerSessions.FirstOrDefault(x =>
+            var auth = _context.PlayerSession.FirstOrDefault(x =>
                 x.RefreshToken == jwtRefresh &&
                 x.PlayerId == playerId &&
                 x.DeletedAt == null &&

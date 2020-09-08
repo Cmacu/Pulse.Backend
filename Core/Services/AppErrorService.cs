@@ -26,7 +26,7 @@ namespace Pulse.Services.Core
                 Details = ex.ToString()
             };
 
-            _context.AppErrors.Add(error);
+            _context.AppError.Add(error);
             _context.SaveChanges();
 
             return error.Id;

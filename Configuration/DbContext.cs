@@ -10,20 +10,20 @@ namespace Pulse.Configuration
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options) {}
 
-        public DbSet<EmailLog> EmailLogs { get; set; }
-        public DbSet<AppError> AppErrors { get; set; }
+        public DbSet<EmailLog> EmailLog { get; set; }
+        public DbSet<AppError> AppError { get; set; }
 
-        public DbSet<Match> Matches { get; set; }
-        public DbSet<MatchPlayer> MatchPlayers { get; set; }
-        public DbSet<MatchmakerLog> MatchmakerLogs { get; set; }
-        public DbSet<MatchmakerLogCounter> MatchmakerLogCounters { get; set; }
-        public DbSet<MatchmakerLogAggregate> MatchmakerLogAggregates { get; set; }
+        public DbSet<Match> Matche { get; set; }
+        public DbSet<MatchPlayer> MatchPlayer { get; set; }
+        public DbSet<MatchmakerLog> MatchmakerLog { get; set; }
+        public DbSet<MatchmakerLogCounter> MatchmakerLogCounter { get; set; }
+        public DbSet<MatchmakerLogAggregate> MatchmakerLogAggregate { get; set; }
 
-        public DbSet<Player> Players { get; set; }
-        public DbSet<PlayerBadge> PlayerBadges { get; set; }
-        public DbSet<PlayerSession> PlayerSessions { get; set; }
-        public DbSet<PlayerSetting> PlayerSettings { get; set; }
-        public DbSet<LeaderboardLog> LeaderboardLogs { get; set; }
+        public DbSet<Player> Player { get; set; }
+        public DbSet<PlayerBadge> PlayerBadge { get; set; }
+        public DbSet<PlayerSession> PlayerSession { get; set; }
+        public DbSet<PlayerSetting> PlayerSetting { get; set; }
+        public DbSet<LeaderboardLog> LeaderboardLog { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

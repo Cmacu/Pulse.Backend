@@ -29,7 +29,7 @@ namespace Pulse.Core.Services
         /// <returns>The settings for the given player.</returns>
         public PlayerSettingsModel Get(int playerId)
         {
-            var settings = _context.PlayerSettings.Where(x => x.PlayerId == playerId);
+            var settings = _context.PlayerSetting.Where(x => x.PlayerId == playerId);
             var model = new PlayerSettingsModel();
 
             foreach (var setting in settings)
@@ -56,7 +56,7 @@ namespace Pulse.Core.Services
             if (!properties.Any(x => x.Name == name))
                 throw new InvalidOperationException($"Setting not available: {name}");
 
-            var row = _context.PlayerSettings.FirstOrDefault(x => x.PlayerId == playerId && x.Name == name);
+            var row = _context.PlayerSetting.FirstOrDefault(x => x.PlayerId == playerId && x.Name == name);
             if (row == null)
             {
                 row = new PlayerSetting()
@@ -64,7 +64,7 @@ namespace Pulse.Core.Services
                 PlayerId = playerId,
                 Name = name,
                 };
-                _context.PlayerSettings.Add(row);
+                _context.PlayerSetting.Add(row);
             }
 
             row.Value = value;

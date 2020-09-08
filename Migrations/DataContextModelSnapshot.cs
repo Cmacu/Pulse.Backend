@@ -34,7 +34,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppErrors");
+                    b.ToTable("AppError");
                 });
 
             modelBuilder.Entity("Pulse.Core.Entities.EmailLog", b =>
@@ -57,7 +57,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmailLogs");
+                    b.ToTable("EmailLog");
                 });
 
             modelBuilder.Entity("Pulse.Core.Entities.Player", b =>
@@ -98,7 +98,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Players");
+                    b.ToTable("Player");
                 });
 
             modelBuilder.Entity("Pulse.Core.Entities.PlayerSession", b =>
@@ -129,7 +129,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerSessions");
+                    b.ToTable("PlayerSession");
                 });
 
             modelBuilder.Entity("Pulse.Core.Entities.PlayerSetting", b =>
@@ -157,7 +157,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerSettings");
+                    b.ToTable("PlayerSetting");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.Match", b =>
@@ -183,7 +183,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Matches");
+                    b.ToTable("Matche");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchPlayer", b =>
@@ -237,7 +237,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("MatchPlayers");
+                    b.ToTable("MatchPlayer");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLog", b =>
@@ -266,7 +266,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MatchmakerLogs");
+                    b.ToTable("MatchmakerLog");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLogAggregate", b =>
@@ -304,7 +304,7 @@ namespace Pulse.Backend.Migrations
                     b.HasIndex("From")
                         .IsUnique();
 
-                    b.ToTable("MatchmakerLogAggregates");
+                    b.ToTable("MatchmakerLogAggregate");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLogCounter", b =>
@@ -342,7 +342,7 @@ namespace Pulse.Backend.Migrations
                     b.HasIndex("From")
                         .IsUnique();
 
-                    b.ToTable("MatchmakerLogCounters");
+                    b.ToTable("MatchmakerLogCounter");
                 });
 
             modelBuilder.Entity("Pulse.Rating.Entities.LeaderboardLog", b =>
@@ -381,7 +381,7 @@ namespace Pulse.Backend.Migrations
                     b.HasIndex("CreatedAt", "PlayerId")
                         .IsUnique();
 
-                    b.ToTable("LeaderboardLogs");
+                    b.ToTable("LeaderboardLog");
                 });
 
             modelBuilder.Entity("Pulse.Rating.Entities.PlayerBadge", b =>
@@ -406,7 +406,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerBadges");
+                    b.ToTable("PlayerBadge");
                 });
 
             modelBuilder.Entity("Pulse.Core.Entities.PlayerSession", b =>
