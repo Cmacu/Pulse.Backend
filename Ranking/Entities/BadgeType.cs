@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Pulse.Rating.Entities
+namespace Pulse.Rank.Entities
 {
     public enum BadgeType
     {

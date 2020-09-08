@@ -18,447 +18,447 @@ namespace Pulse.Backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Pulse.Core.Entities.AppError", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<string>("Details")
-                        .HasColumnType("text");
+                b.Property<string>("Details")
+                    .HasColumnType("text");
 
-                    b.Property<string>("Message")
-                        .HasColumnType("text");
+                b.Property<string>("Message")
+                    .HasColumnType("text");
 
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("Timestamp")
+                    .HasColumnType("datetime");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("AppError");
-                });
+                b.ToTable("AppError");
+            });
 
             modelBuilder.Entity("Pulse.Core.Entities.EmailLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<string>("Body")
-                        .HasColumnType("text");
+                b.Property<string>("Body")
+                    .HasColumnType("text");
 
-                    b.Property<string>("Subject")
-                        .HasColumnType("text");
+                b.Property<string>("Subject")
+                    .HasColumnType("text");
 
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("Timestamp")
+                    .HasColumnType("datetime");
 
-                    b.Property<string>("To")
-                        .HasColumnType("text");
+                b.Property<string>("To")
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("EmailLog");
-                });
+                b.ToTable("EmailLog");
+            });
 
             modelBuilder.Entity("Pulse.Core.Entities.Player", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<string>("Avatar")
-                        .HasColumnType("text");
+                b.Property<string>("Avatar")
+                    .HasColumnType("text");
 
-                    b.Property<string>("Country")
-                        .HasColumnType("text");
+                b.Property<string>("Country")
+                    .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<int>("Division")
-                        .HasColumnType("int");
+                b.Property<int>("Division")
+                    .HasColumnType("int");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
+                b.Property<string>("Email")
+                    .HasColumnType("text");
 
-                    b.Property<DateTime?>("IsBlockedUntil")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("IsBlockedUntil")
+                    .HasColumnType("datetime");
 
-                    b.Property<int>("Level")
-                        .HasColumnType("int");
+                b.Property<int>("Level")
+                    .HasColumnType("int");
 
-                    b.Property<double>("RatingDeviation")
-                        .HasColumnType("double");
+                b.Property<double>("RatingDeviation")
+                    .HasColumnType("double");
 
-                    b.Property<double>("RatingMean")
-                        .HasColumnType("double");
+                b.Property<double>("RatingMean")
+                    .HasColumnType("double");
 
-                    b.Property<string>("Username")
-                        .HasColumnType("text");
+                b.Property<string>("Username")
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Player");
-                });
+                b.ToTable("Player");
+            });
 
             modelBuilder.Entity("Pulse.Core.Entities.PlayerSession", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("DeletedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("text");
+                b.Property<string>("IpAddress")
+                    .HasColumnType("text");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("int");
 
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
+                b.Property<string>("RefreshToken")
+                    .HasColumnType("text");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("datetime");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("PlayerId");
+                b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerSession");
-                });
+                b.ToTable("PlayerSession");
+            });
 
             modelBuilder.Entity("Pulse.Core.Entities.PlayerSetting", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("DeletedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
+                b.Property<string>("Name")
+                    .HasColumnType("text");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<string>("Value")
-                        .HasColumnType("text");
+                b.Property<string>("Value")
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("PlayerId");
+                b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerSetting");
-                });
+                b.ToTable("PlayerSetting");
+            });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.Match", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("EndDate")
+                    .HasColumnType("datetime");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
+                b.Property<string>("Name")
+                    .HasColumnType("text");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("StartDate")
+                    .HasColumnType("datetime");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                b.Property<int>("Status")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("datetime");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("Matche");
-                });
+                b.ToTable("Matche");
+            });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchPlayer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<int>("DecayDays")
-                        .HasColumnType("int");
+                b.Property<int>("DecayDays")
+                    .HasColumnType("int");
 
-                    b.Property<int>("DecayValue")
-                        .HasColumnType("int");
+                b.Property<int>("DecayValue")
+                    .HasColumnType("int");
 
-                    b.Property<bool>("IsWin")
-                        .HasColumnType("bit");
+                b.Property<bool>("IsWin")
+                    .HasColumnType("bit");
 
-                    b.Property<int>("MatchId")
-                        .HasColumnType("int");
+                b.Property<int>("MatchId")
+                    .HasColumnType("int");
 
-                    b.Property<double>("NewRatingDeviation")
-                        .HasColumnType("double");
+                b.Property<double>("NewRatingDeviation")
+                    .HasColumnType("double");
 
-                    b.Property<double>("NewRatingMean")
-                        .HasColumnType("double");
+                b.Property<double>("NewRatingMean")
+                    .HasColumnType("double");
 
-                    b.Property<double>("OldRatingDeviation")
-                        .HasColumnType("double");
+                b.Property<double>("OldRatingDeviation")
+                    .HasColumnType("double");
 
-                    b.Property<double>("OldRatingMean")
-                        .HasColumnType("double");
+                b.Property<double>("OldRatingMean")
+                    .HasColumnType("double");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Position")
-                        .HasColumnType("int");
+                b.Property<int>("Position")
+                    .HasColumnType("int");
 
-                    b.Property<double>("RatingDelta")
-                        .HasColumnType("double");
+                b.Property<double>("RatingDelta")
+                    .HasColumnType("double");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
+                b.Property<int>("Score")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                b.Property<int>("Status")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("MatchId");
+                b.HasIndex("MatchId");
 
-                    b.HasIndex("PlayerId");
+                b.HasIndex("PlayerId");
 
-                    b.ToTable("MatchPlayer");
-                });
+                b.ToTable("MatchPlayer");
+            });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("AddedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("AddedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime?>("ExpiredAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("ExpiredAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<int?>("MatchId")
-                        .HasColumnType("int");
+                b.Property<int?>("MatchId")
+                    .HasColumnType("int");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("int");
 
-                    b.Property<double>("Rating")
-                        .HasColumnType("double");
+                b.Property<double>("Rating")
+                    .HasColumnType("double");
 
-                    b.Property<string>("RecentOpponents")
-                        .HasColumnType("text");
+                b.Property<string>("RecentOpponents")
+                    .HasColumnType("text");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("MatchmakerLog");
-                });
+                b.ToTable("MatchmakerLog");
+            });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLogAggregate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("DeletedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime>("From")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("From")
+                    .HasColumnType("datetime");
 
-                    b.Property<int>("LogCount")
-                        .HasColumnType("int");
+                b.Property<int>("LogCount")
+                    .HasColumnType("int");
 
-                    b.Property<int>("MatchCount")
-                        .HasColumnType("int");
+                b.Property<int>("MatchCount")
+                    .HasColumnType("int");
 
-                    b.Property<int>("PlayerCount")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerCount")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("To")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("To")
+                    .HasColumnType("datetime");
 
-                    b.Property<double>("WaitSeconds")
-                        .HasColumnType("double");
+                b.Property<double>("WaitSeconds")
+                    .HasColumnType("double");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("From")
-                        .IsUnique();
+                b.HasIndex("From")
+                    .IsUnique();
 
-                    b.ToTable("MatchmakerLogAggregate");
-                });
+                b.ToTable("MatchmakerLogAggregate");
+            });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLogCounter", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("DeletedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime>("From")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("From")
+                    .HasColumnType("datetime");
 
-                    b.Property<int>("LogCount")
-                        .HasColumnType("int");
+                b.Property<int>("LogCount")
+                    .HasColumnType("int");
 
-                    b.Property<int>("MatchCount")
-                        .HasColumnType("int");
+                b.Property<int>("MatchCount")
+                    .HasColumnType("int");
 
-                    b.Property<int>("PlayerCount")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerCount")
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("To")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("To")
+                    .HasColumnType("datetime");
 
-                    b.Property<double>("WaitSeconds")
-                        .HasColumnType("double");
+                b.Property<double>("WaitSeconds")
+                    .HasColumnType("double");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("From")
-                        .IsUnique();
+                b.HasIndex("From")
+                    .IsUnique();
 
-                    b.ToTable("MatchmakerLogCounter");
-                });
+                b.ToTable("MatchmakerLogCounter");
+            });
 
-            modelBuilder.Entity("Pulse.Rating.Entities.LeaderboardLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            modelBuilder.Entity("Pulse.Rank.Entities.LeaderboardLog", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<double>("ConservativeRating")
-                        .HasColumnType("double");
+                b.Property<double>("ConservativeRating")
+                    .HasColumnType("double");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("DeletedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("int");
 
-                    b.Property<int?>("PreviousRank")
-                        .HasColumnType("int");
+                b.Property<int?>("PreviousRank")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Rank")
-                        .HasColumnType("int");
+                b.Property<int>("Rank")
+                    .HasColumnType("int");
 
-                    b.Property<int>("TotalDecay")
-                        .HasColumnType("int");
+                b.Property<int>("TotalDecay")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("CreatedAt");
+                b.HasIndex("CreatedAt");
 
-                    b.HasIndex("PlayerId");
+                b.HasIndex("PlayerId");
 
-                    b.HasIndex("CreatedAt", "PlayerId")
-                        .IsUnique();
+                b.HasIndex("CreatedAt", "PlayerId")
+                    .IsUnique();
 
-                    b.ToTable("LeaderboardLog");
-                });
+                b.ToTable("LeaderboardLog");
+            });
 
-            modelBuilder.Entity("Pulse.Rating.Entities.PlayerBadge", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            modelBuilder.Entity("Pulse.Rank.Entities.PlayerBadge", b =>
+            {
+                b.Property<int>("Id")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime");
+                b.Property<DateTime?>("DeletedAt")
+                    .HasColumnType("datetime");
 
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
+                b.Property<int>("PlayerId")
+                    .HasColumnType("int");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                b.Property<int>("Type")
+                    .HasColumnType("int");
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.HasIndex("PlayerId");
+                b.HasIndex("PlayerId");
 
-                    b.ToTable("PlayerBadge");
-                });
+                b.ToTable("PlayerBadge");
+            });
 
             modelBuilder.Entity("Pulse.Core.Entities.PlayerSession", b =>
-                {
-                    b.HasOne("Pulse.Core.Entities.Player", "Player")
-                        .WithMany("Sessions")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+            {
+                b.HasOne("Pulse.Core.Entities.Player", "Player")
+                    .WithMany("Sessions")
+                    .HasForeignKey("PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
             modelBuilder.Entity("Pulse.Core.Entities.PlayerSetting", b =>
-                {
-                    b.HasOne("Pulse.Core.Entities.Player", "Player")
-                        .WithMany("Settings")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+            {
+                b.HasOne("Pulse.Core.Entities.Player", "Player")
+                    .WithMany("Settings")
+                    .HasForeignKey("PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
             modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchPlayer", b =>
-                {
-                    b.HasOne("Pulse.Matchmaker.Entities.Match", "Match")
-                        .WithMany("MatchPlayers")
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            {
+                b.HasOne("Pulse.Matchmaker.Entities.Match", "Match")
+                    .WithMany("MatchPlayers")
+                    .HasForeignKey("MatchId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
 
-                    b.HasOne("Pulse.Core.Entities.Player", "Player")
-                        .WithMany("Matches")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                b.HasOne("Pulse.Core.Entities.Player", "Player")
+                    .WithMany("Matches")
+                    .HasForeignKey("PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
-            modelBuilder.Entity("Pulse.Rating.Entities.LeaderboardLog", b =>
-                {
-                    b.HasOne("Pulse.Core.Entities.Player", "Player")
-                        .WithMany("LeaderboardLogs")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+            modelBuilder.Entity("Pulse.Rank.Entities.LeaderboardLog", b =>
+            {
+                b.HasOne("Pulse.Core.Entities.Player", "Player")
+                    .WithMany("LeaderboardLogs")
+                    .HasForeignKey("PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 
-            modelBuilder.Entity("Pulse.Rating.Entities.PlayerBadge", b =>
-                {
-                    b.HasOne("Pulse.Core.Entities.Player", "Player")
-                        .WithMany("Badges")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+            modelBuilder.Entity("Pulse.Rank.Entities.PlayerBadge", b =>
+            {
+                b.HasOne("Pulse.Core.Entities.Player", "Player")
+                    .WithMany("Badges")
+                    .HasForeignKey("PlayerId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+            });
 #pragma warning restore 612, 618
         }
     }

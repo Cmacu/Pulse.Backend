@@ -11,7 +11,7 @@ using Pulse.Configuration;
 using Pulse.Core.Entities;
 using Pulse.Core.Models;
 using Pulse.Exceptions;
-using Pulse.Rating.Entities;
+using Pulse.Rank.Entities;
 
 namespace Pulse.Core.Services
 {

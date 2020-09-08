@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulse.Matchmaker.Entities;
-using Pulse.Rating.Entities;
+using Pulse.Rank.Entities;
 
 namespace Pulse.Core.Entities
 {

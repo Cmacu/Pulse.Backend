@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pulse.Core.Entities;
 using Pulse.Matchmaker.Entities;
-using Pulse.Rating.Entities;
+using Pulse.Rank.Entities;
 
 namespace Pulse.Configuration
 {
