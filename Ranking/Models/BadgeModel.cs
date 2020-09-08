@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Pulse.Rating.Models
+namespace Pulse.Rank.Models
 {
     public class BadgeModel
     {

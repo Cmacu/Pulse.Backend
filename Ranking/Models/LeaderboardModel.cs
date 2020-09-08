@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Pulse.Core.Entities;
 
-namespace Pulse.Rating.Models
+namespace Pulse.Rank.Models
 {
     public class LeaderboardModel
     {
