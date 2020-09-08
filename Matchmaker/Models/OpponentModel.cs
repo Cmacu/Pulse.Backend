@@ -9,7 +9,7 @@ namespace Pulse.Matchmaker.Models
     {
         public int Id { get; set; }
         public string Avatar { get; set; }
-        public string CgeUsername { get; set; }
+        public string Username { get; set; }
         public int Position { get; set; }
         public Division Division { get; set; }
         public int Level { get; set; }

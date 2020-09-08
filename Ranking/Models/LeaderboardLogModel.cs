@@ -7,7 +7,7 @@ namespace Pulse.Rank.Models
 {
     public class LeaderboardLogModel
     {
-        public string CgeUsername { get; set; }
+        public string Username { get; set; }
         public double LeaderboardRating { get; set; }
         public int TotalDecay { get; set; }
         public int Rank { get; set; }

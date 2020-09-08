@@ -17,9 +17,8 @@ namespace Pulse.Core.Services
 {
     public interface IAuthService
     {
-        AuthModel Authenticate(string cgeToken, string cgeRefreshToken, string ipAddress);
+        AuthModel Authenticate(string token, string refreshToken, string ipAddress);
         AuthModel Refresh(string jwt, string jwtRefresh, string ipAddress);
-        string RefreshCgeToken(string cgeRefreshToken);
     }
 
     public class AuthService : IAuthService
@@ -80,11 +79,12 @@ namespace Pulse.Core.Services
                 throw new SecurityTokenException("Invalid access token");
 
             var playerId = int.Parse(principal.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var refreshTokenExpirationDays = _configuration.GetValue<int>("Server:RefreshTokenExpirationDays");
             var auth = _context.PlayerSession.FirstOrDefault(x =>
                 x.RefreshToken == jwtRefresh &&
                 x.PlayerId == playerId &&
                 x.DeletedAt == null &&
-                x.UpdatedAt > DateTime.UtcNow.AddDays(-1 * _configuration.GetValue<int>("Cge:RefreshExpiresAtDays")));
+                x.UpdatedAt > DateTime.UtcNow.AddDays(-1 * refreshTokenExpirationDays));
 
             if (auth == null)
                 throw new SecurityTokenException("Invalid refresh token");
@@ -95,15 +95,6 @@ namespace Pulse.Core.Services
             newJwt.RefreshToken = jwtRefresh;
 
             return newJwt;
-        }
-
-        public string RefreshCgeToken(string cgeRefreshToken)
-        {
-            var token = "";
-            if (token == null)
-                throw new MyUnauthorizedException("Player not found. Invalid refresh token");
-
-            return "";
         }
 
         private AuthModel GenerateJwt(IEnumerable<Claim> claims)

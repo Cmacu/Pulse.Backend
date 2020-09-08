@@ -62,10 +62,10 @@ namespace Pulse.Matchmaker.Services
 
         public MatchModel UpdateMatch(Match match, ResultModel result)
         {
-            // Retrieve data from CGE to get the latest match information
+            // Retrieve data from the latest match information
             if (match.Status == MatchStatus.InProgress && match.UpdatedAt.AddSeconds(30) < DateTime.UtcNow)
             {
-                match = UpdateMatchFromCge(match, result);
+                match = UpdateMatchResult(match, result);
                 match.UpdatedAt = DateTime.UtcNow;
                 _context.SaveChanges();
             }
@@ -74,7 +74,7 @@ namespace Pulse.Matchmaker.Services
         }
 
         /// <summary>
-        /// Create a new match in the CGE platform and in the database.
+        /// Create a new match in the platform and in the database.
         /// </summary>
         /// <param name="playerIds">The IDs of the players in the match.</param>
         /// <returns>The database ID of the new match.</returns>
@@ -200,7 +200,7 @@ namespace Pulse.Matchmaker.Services
             }
         }
 
-        private Match UpdateMatchFromCge(Match match, ResultModel result)
+        private Match UpdateMatchResult(Match match, ResultModel result)
         {
             match.Status = result.Status;
 
@@ -211,7 +211,7 @@ namespace Pulse.Matchmaker.Services
             match.EndDate = DateTime.UtcNow;
             foreach (var matchPlayer in match.MatchPlayers)
             {
-                this.UpdateMatchPlayerFromCge(matchPlayer, result);
+                this.UpdateMatchPlayer(matchPlayer, result);
             }
 
             _ratingService.RateMatch(match);
@@ -234,7 +234,7 @@ namespace Pulse.Matchmaker.Services
             return _decayService.GetDecaySteps(previousDecay, lastMatch.StartDate);
         }
 
-        private void UpdateMatchPlayerFromCge(MatchPlayer matchPlayer, ResultModel result)
+        private void UpdateMatchPlayer(MatchPlayer matchPlayer, ResultModel result)
         {
             var username = matchPlayer.Player.Username;
             var player = result.Players.First(x => x.Username == username);
