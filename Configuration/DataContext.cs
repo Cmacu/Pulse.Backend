@@ -13,7 +13,7 @@ namespace Pulse.Configuration
         public DbSet<EmailLog> EmailLog { get; set; }
         public DbSet<AppError> AppError { get; set; }
 
-        public DbSet<Match> Matche { get; set; }
+        public DbSet<Match> Match { get; set; }
         public DbSet<MatchPlayer> MatchPlayer { get; set; }
         public DbSet<MatchmakerLog> MatchmakerLog { get; set; }
         public DbSet<MatchmakerLogCounter> MatchmakerLogCounter { get; set; }
