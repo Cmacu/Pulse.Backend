@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Pulse.Entities.Player
+namespace Pulse.Core.Entities
 {
     public class PlayerSetting
     {

@@ -1,4 +1,4 @@
-namespace Pulse.Entities.Player
+namespace Pulse.Core.Entities
 {
     public enum PlayerStatus
     {

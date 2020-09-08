@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pulse.Entities.Core
+namespace Pulse.Core.Entities
 {
     public class AppError
     {

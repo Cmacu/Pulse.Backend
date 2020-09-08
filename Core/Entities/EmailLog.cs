@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Pulse.Entities.Core
+namespace Pulse.Core.Entities
 {
     public class EmailLog
     {

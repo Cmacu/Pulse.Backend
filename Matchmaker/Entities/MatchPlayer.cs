@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Pulse.Entities.Player;
+using Pulse.Core.Entities;
 
-namespace Pulse.Entities.Match
+namespace Pulse.Matchmaker.Entities
 {
     public class MatchPlayer
     {
@@ -10,7 +10,7 @@ namespace Pulse.Entities.Match
         public int MatchId { get; set; }
         public MatchStatus Status { get; set; }
 
-        public Player.Player Player { get; set; }
+        public Player Player { get; set; }
         public int PlayerId { get; set; }
 
         public int Position { get; set; }

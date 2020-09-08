@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Pulse.Entities.Match;
+using Pulse.Matchmaker.Entities;
+using Pulse.Rating.Entities;
 
-namespace Pulse.Entities.Player
+namespace Pulse.Core.Entities
 {
     public class Player
     {

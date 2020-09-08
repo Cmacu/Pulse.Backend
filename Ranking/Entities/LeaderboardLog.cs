@@ -1,6 +1,7 @@
 ﻿using System;
+using Pulse.Core.Entities;
 
-namespace Pulse.Entities.Player
+namespace Pulse.Rating.Entities
 {
     public class LeaderboardLog
     {

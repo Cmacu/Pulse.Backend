@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Pulse.Entities.Core;
-using Pulse.Entities.Match;
-using Pulse.Entities.Player;
+using Pulse.Core.Entities;
+using Pulse.Matchmaker.Entities;
+using Pulse.Rating.Entities;
 
-namespace Pulse.Entities
+namespace Pulse.Configuration
 {
 
     public class DataContext : DbContext
@@ -13,13 +13,13 @@ namespace Pulse.Entities
         public DbSet<EmailLog> EmailLogs { get; set; }
         public DbSet<AppError> AppErrors { get; set; }
 
-        public DbSet<Match.Match> Matches { get; set; }
+        public DbSet<Match> Matches { get; set; }
         public DbSet<MatchPlayer> MatchPlayers { get; set; }
         public DbSet<MatchmakerLog> MatchmakerLogs { get; set; }
         public DbSet<MatchmakerLogCounter> MatchmakerLogCounters { get; set; }
         public DbSet<MatchmakerLogAggregate> MatchmakerLogAggregates { get; set; }
 
-        public DbSet<Player.Player> Players { get; set; }
+        public DbSet<Player> Players { get; set; }
         public DbSet<PlayerBadge> PlayerBadges { get; set; }
         public DbSet<PlayerSession> PlayerSessions { get; set; }
         public DbSet<PlayerSetting> PlayerSettings { get; set; }

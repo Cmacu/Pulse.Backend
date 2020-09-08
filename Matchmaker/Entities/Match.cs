@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Pulse.Entities.Match
+namespace Pulse.Matchmaker.Entities
 {
     public class Match
     {

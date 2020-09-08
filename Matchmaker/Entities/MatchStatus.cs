@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Pulse.Entities.Match
+namespace Pulse.Matchmaker.Entities
 {
     public enum MatchStatus
     {

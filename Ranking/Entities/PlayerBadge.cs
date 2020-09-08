@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Security.Policy;
-using System.Text;
+using Pulse.Core.Entities;
 
-namespace Pulse.Entities.Player
+namespace Pulse.Rating.Entities
 {
     public class PlayerBadge
     {

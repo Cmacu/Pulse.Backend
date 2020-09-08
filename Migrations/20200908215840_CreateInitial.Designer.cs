@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Pulse.Entities;
+using Pulse.Configuration;
 
 namespace Pulse.Backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200908172018_CreateInitial")]
+    [Migration("20200908215840_CreateInitial")]
     partial class CreateInitial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,7 +19,7 @@ namespace Pulse.Backend.Migrations
                 .HasAnnotation("ProductVersion", "3.1.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("Pulse.Entities.Core.AppError", b =>
+            modelBuilder.Entity("Pulse.Core.Entities.AppError", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -39,7 +39,7 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("AppErrors");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Core.EmailLog", b =>
+            modelBuilder.Entity("Pulse.Core.Entities.EmailLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,7 +62,107 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("EmailLogs");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Match.Match", b =>
+            modelBuilder.Entity("Pulse.Core.Entities.Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Avatar")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("Division")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("IsBlockedUntil")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.Property<double>("RatingDeviation")
+                        .HasColumnType("double");
+
+                    b.Property<double>("RatingMean")
+                        .HasColumnType("double");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Players");
+                });
+
+            modelBuilder.Entity("Pulse.Core.Entities.PlayerSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("IpAddress")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("PlayerSessions");
+                });
+
+            modelBuilder.Entity("Pulse.Core.Entities.PlayerSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("PlayerSettings");
+                });
+
+            modelBuilder.Entity("Pulse.Matchmaker.Entities.Match", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -88,7 +188,7 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("Matches");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Match.MatchPlayer", b =>
+            modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchPlayer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -142,7 +242,7 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("MatchPlayers");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Match.MatchmakerLog", b =>
+            modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -171,7 +271,7 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("MatchmakerLogs");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Match.MatchmakerLogAggregate", b =>
+            modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLogAggregate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -209,7 +309,7 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("MatchmakerLogAggregates");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Match.MatchmakerLogCounter", b =>
+            modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchmakerLogCounter", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -247,7 +347,7 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("MatchmakerLogCounters");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Player.LeaderboardLog", b =>
+            modelBuilder.Entity("Pulse.Rating.Entities.LeaderboardLog", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -286,48 +386,7 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("LeaderboardLogs");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Player.Player", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<string>("Avatar")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Country")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<int>("Division")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("IsBlockedUntil")
-                        .HasColumnType("datetime");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("int");
-
-                    b.Property<double>("RatingDeviation")
-                        .HasColumnType("double");
-
-                    b.Property<double>("RatingMean")
-                        .HasColumnType("double");
-
-                    b.Property<string>("Username")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Players");
-                });
-
-            modelBuilder.Entity("Pulse.Entities.Player.PlayerBadge", b =>
+            modelBuilder.Entity("Pulse.Rating.Entities.PlayerBadge", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -352,111 +411,52 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("PlayerBadges");
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Player.PlayerSession", b =>
+            modelBuilder.Entity("Pulse.Core.Entities.PlayerSession", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("text");
-
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId");
-
-                    b.ToTable("PlayerSessions");
-                });
-
-            modelBuilder.Entity("Pulse.Entities.Player.PlayerSetting", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<int>("PlayerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId");
-
-                    b.ToTable("PlayerSettings");
-                });
-
-            modelBuilder.Entity("Pulse.Entities.Match.MatchPlayer", b =>
-                {
-                    b.HasOne("Pulse.Entities.Match.Match", "Match")
-                        .WithMany("MatchPlayers")
-                        .HasForeignKey("MatchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Pulse.Entities.Player.Player", "Player")
-                        .WithMany("Matches")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Pulse.Entities.Player.LeaderboardLog", b =>
-                {
-                    b.HasOne("Pulse.Entities.Player.Player", "Player")
-                        .WithMany("LeaderboardLogs")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Pulse.Entities.Player.PlayerBadge", b =>
-                {
-                    b.HasOne("Pulse.Entities.Player.Player", "Player")
-                        .WithMany("Badges")
-                        .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Pulse.Entities.Player.PlayerSession", b =>
-                {
-                    b.HasOne("Pulse.Entities.Player.Player", "Player")
+                    b.HasOne("Pulse.Core.Entities.Player", "Player")
                         .WithMany("Sessions")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Pulse.Entities.Player.PlayerSetting", b =>
+            modelBuilder.Entity("Pulse.Core.Entities.PlayerSetting", b =>
                 {
-                    b.HasOne("Pulse.Entities.Player.Player", "Player")
+                    b.HasOne("Pulse.Core.Entities.Player", "Player")
                         .WithMany("Settings")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Pulse.Matchmaker.Entities.MatchPlayer", b =>
+                {
+                    b.HasOne("Pulse.Matchmaker.Entities.Match", "Match")
+                        .WithMany("MatchPlayers")
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pulse.Core.Entities.Player", "Player")
+                        .WithMany("Matches")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Pulse.Rating.Entities.LeaderboardLog", b =>
+                {
+                    b.HasOne("Pulse.Core.Entities.Player", "Player")
+                        .WithMany("LeaderboardLogs")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Pulse.Rating.Entities.PlayerBadge", b =>
+                {
+                    b.HasOne("Pulse.Core.Entities.Player", "Player")
+                        .WithMany("Badges")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

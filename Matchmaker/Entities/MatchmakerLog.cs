@@ -1,6 +1,6 @@
 using System;
 
-namespace Pulse.Entities.Match
+namespace Pulse.Matchmaker.Entities
 {
     public class MatchmakerLog
     {

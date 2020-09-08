@@ -1,9 +1,8 @@
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Pulse.Entities.Match
+namespace Pulse.Matchmaker.Entities
 {
-    public class MatchmakerLogCounter
+    public class MatchmakerLogAggregate
     {
         public int Id { get; set; }
         public DateTime From { get; set; }
@@ -13,6 +12,6 @@ namespace Pulse.Entities.Match
         public int LogCount { get; set; }
         public double WaitSeconds { get; set; }
         public DateTime CreatedAt { get; set; }
-        public DateTime? DeletedAt { get; set; }
+        public DateTime DeletedAt { get; set; }
     }
 }

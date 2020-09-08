@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Pulse.Entities.Player
+namespace Pulse.Rating.Entities
 {
     public enum Division
     {
