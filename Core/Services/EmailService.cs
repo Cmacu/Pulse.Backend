@@ -19,7 +19,7 @@ namespace Pulse.Core.Services
     public interface IEmailService
     {
         Task SendException(Exception ex);
-        Task SendMatchmakerAddNotification(MatchmakerPlayerDetails playerDetails);
+        Task SendMatchmakerAddNotification(SeekModel seek);
         Task SendMatchCreatedNotification(Match match, Player player);
     }
 
@@ -53,11 +53,11 @@ namespace Pulse.Core.Services
             await this.SendMany(toAddress, subject, body);
         }
 
-        public async Task SendMatchmakerAddNotification(MatchmakerPlayerDetails playerDetails)
+        public async Task SendMatchmakerAddNotification(SeekModel seek)
         {
             var toAddress = _internalAddress;
-            var subject = $"Pulse: PlayerId {playerDetails.Player} joined the pool";
-            var body = JsonConvert.SerializeObject(playerDetails);
+            var subject = $"Pulse: PlayerId {seek.Player} joined the pool";
+            var body = JsonConvert.SerializeObject(seek);
             await this.SendMany(toAddress, subject, body);
         }
 

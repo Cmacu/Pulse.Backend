@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pulse.Matchmaker.Models
 {
-    public class MatchmakerPlayerDetails : IComparable<MatchmakerPlayerDetails>
+    public class SeekModel : IComparable<SeekModel>
     {
         public string Player { get; }
         public double Rating { get; }
@@ -12,7 +12,7 @@ namespace Pulse.Matchmaker.Models
 
         public Boolean IsMatched { get; set; }
 
-        public MatchmakerPlayerDetails(
+        public SeekModel(
             string player,
             double rating,
             IReadOnlyList<string> recentOpponents,
@@ -26,7 +26,7 @@ namespace Pulse.Matchmaker.Models
             this.IsMatched = false;
         }
 
-        public int CompareTo(MatchmakerPlayerDetails other)
+        public int CompareTo(SeekModel other)
         {
             if (this.Player == other.Player)
             {
