@@ -347,3 +347,6 @@ healthchecksdb
 
 # Local secrets
 secrets.json
+
+#shell-scripts
+*.sh

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using Pulse.Matchmaker.Entities;
 using Pulse.Rank.Entities;
 
-namespace Pulse.Core.Entities
-{
-    public class Player
-    {
+namespace Pulse.Core.Entities {
+    public class Player {
         public int Id { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
+        public string AccessCode { get; set; }
+        public int RequestCount { get; set; }
         public string Avatar { get; set; }
         public string Country { get; set; }
 
@@ -26,5 +26,7 @@ namespace Pulse.Core.Entities
 
         public DateTime? IsBlockedUntil { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }

@@ -6,19 +6,18 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Pulse.Configuration;
 using Pulse.Core.Entities;
 using Pulse.Core.Models;
 using Pulse.Exceptions;
-using Pulse.Rank.Entities;
 
 namespace Pulse.Core.Services {
     public interface IAuthService {
-        string Register(string email, string ipAddress);
-        AuthModel Refresh(string token, string refreshToken, string ipAddress);
+        void SendAccessCode(string email);
+        AuthModel Login(string email, string accessCode, string ipAddress, string browser);
+        AuthModel Refresh(string accessToken, string refreshToken, string ipAddress);
     }
 
     public class AuthService : IAuthService {
@@ -39,14 +38,31 @@ namespace Pulse.Core.Services {
             _key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
         }
 
-        public string Register(string email, string ipAddress) {
+        public void SendAccessCode(string email) {
             if (!IsValidEmail(email))
-                throw new MyUnauthorizedException("Invalid email: " + email);
+                throw new PulseUnauthorizedException("Invalid email: " + email);
 
-            var player = _context.Player.FirstOrDefault(x => x.Email == email);
+            var player = GetPlayer(email);
             if (player == null) {
-                player = new Player() { Email = email };
+                player = new Player() { Email = email, CreatedAt = DateTime.UtcNow };
+                _context.Player.Add(player);
             }
+            player.AccessCode = Guid.NewGuid().ToString().Split('-') [1];
+            player.UpdatedAt = DateTime.UtcNow;
+            player.RequestCount++;
+            _context.SaveChangesAsync();
+            _emailService.SendAuthorizationLink(player);
+        }
+
+        public AuthModel Login(string email, string accessCode, string ipAddress, string browser) {
+            var player = GetPlayer(email);
+            if (player == null) throw new PulseUnauthorizedException("Email not found!");
+            if (player.AccessCode != accessCode) {
+                player.RequestCount++;
+                _context.SaveChanges();
+                throw new PulseUnauthorizedException("Invalid access code!");
+            }
+
             var claims = new List<Claim>() {
                 new Claim(ClaimTypes.Email, email)
             };
@@ -60,16 +76,20 @@ namespace Pulse.Core.Services {
                 RefreshToken = authModel.RefreshToken,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                IpAddress = ipAddress
+                IpAddress = ipAddress,
+                Browser = browser,
             };
-            player.Sessions.Add(session);
-            _emailService.SendAuthorizationLink(email, authModel.AccessToken, authModel.RefreshToken);
-            _context.SaveChangesAsync();
 
-            return "Please check your email for access link";
+            player.AccessCode = "";
+            player.RequestCount = 0;
+            player.UpdatedAt = DateTime.UtcNow;
+            player.Sessions.Add(session);
+            _context.SaveChanges();
+
+            return authModel;
         }
 
-        public AuthModel Refresh(string token, string refreshToken, string ipAddress) {
+        public AuthModel Refresh(string accessToken, string refreshToken, string ipAddress) {
             var parameters = new TokenValidationParameters() {
                 ValidateAudience = false,
                 ValidateIssuer = false,
@@ -77,15 +97,15 @@ namespace Pulse.Core.Services {
                 IssuerSigningKey = new SymmetricSecurityKey(_key),
             };
 
-            var principal = _jwtSecurityTokenHandler.ValidateToken(token, parameters, out var securityToken);
+            var principal = _jwtSecurityTokenHandler.ValidateToken(accessToken, parameters, out var securityToken);
 
-            if (!(securityToken is JwtSecurityToken jwtSecurityToken) || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                throw new SecurityTokenException("Invalid access token");
+            if (!(securityToken is JwtSecurityToken jwtSecurityToken) ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
+            ) throw new SecurityTokenException("Invalid access token");
 
             var email = principal.FindFirst(ClaimTypes.Email).Value;
             var refreshTokenExpirationDays = _configuration.GetValue<int>("Server:RefreshTokenExpirationDays");
             var session = _context.PlayerSession
-                .Include(x => x.Player)
                 .FirstOrDefault(x =>
                     x.RefreshToken == refreshToken &&
                     x.Player.Email == email &&
@@ -102,6 +122,9 @@ namespace Pulse.Core.Services {
                 RefreshToken = refreshToken
             };
 
+            session.UpdatedAt = DateTime.UtcNow;
+            _context.SaveChangesAsync();
+
             return authModel;
         }
 
@@ -112,9 +135,9 @@ namespace Pulse.Core.Services {
                 Expires = DateTime.UtcNow.AddSeconds(expirySeconds),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature)
             };
-            var token = _jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
+            var accessToken = _jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
 
-            return _jwtSecurityTokenHandler.WriteToken(token);
+            return _jwtSecurityTokenHandler.WriteToken(accessToken);
         }
 
         private bool IsValidEmail(string email) {
@@ -152,6 +175,16 @@ namespace Pulse.Core.Services {
             } catch (RegexMatchTimeoutException) {
                 return false;
             }
+        }
+
+        private Player GetPlayer(string email) {
+            var player = _context.Player.FirstOrDefault(x => x.Email == email);
+            if (player == null) return player;
+            if (player.IsBlockedUntil != null && player.IsBlockedUntil < DateTime.UtcNow)
+                throw new PulseUnauthorizedException($"Account is blocked until { player.IsBlockedUntil }. Contact admin for more details.");
+            if (player.RequestCount > 5)
+                throw new PulseUnauthorizedException($"Too many access attempts. Accout is blocked. Contact admin to restore access.");
+            return player;
         }
     }
 }

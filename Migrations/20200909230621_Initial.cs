@@ -1,10 +1,10 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using MySql.Data.EntityFrameworkCore.Metadata;
 
 namespace Pulse.Backend.Migrations
 {
-    public partial class CreateInitial : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,10 +13,10 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    Message = table.Column<string>(nullable: true),
-                    Details = table.Column<string>(nullable: true)
+                    Message = table.Column<string>(maxLength: 256, nullable: true),
+                    Details = table.Column<string>(maxLength: 10000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -28,11 +28,11 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    To = table.Column<string>(nullable: true),
-                    Subject = table.Column<string>(nullable: true),
-                    Body = table.Column<string>(nullable: true)
+                    To = table.Column<string>(maxLength: 256, nullable: true),
+                    Subject = table.Column<string>(maxLength: 256, nullable: true),
+                    Body = table.Column<string>(maxLength: 10000, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -40,12 +40,12 @@ namespace Pulse.Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Matche",
+                name: "Match",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(nullable: true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(maxLength: 256, nullable: true),
                     Status = table.Column<int>(nullable: false),
                     StartDate = table.Column<DateTime>(nullable: false),
                     EndDate = table.Column<DateTime>(nullable: true),
@@ -53,7 +53,7 @@ namespace Pulse.Backend.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Matche", x => x.Id);
+                    table.PrimaryKey("PK_Match", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -61,11 +61,11 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PlayerId = table.Column<int>(nullable: false),
                     AddedAt = table.Column<DateTime>(nullable: false),
                     Rating = table.Column<double>(nullable: false),
-                    RecentOpponents = table.Column<string>(nullable: true),
+                    RecentOpponents = table.Column<string>(maxLength: 256, nullable: true),
                     ExpiredAt = table.Column<DateTime>(nullable: true),
                     MatchId = table.Column<int>(nullable: true)
                 },
@@ -79,7 +79,7 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     From = table.Column<DateTime>(nullable: false),
                     To = table.Column<DateTime>(nullable: false),
                     PlayerCount = table.Column<int>(nullable: false),
@@ -99,7 +99,7 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     From = table.Column<DateTime>(nullable: false),
                     To = table.Column<DateTime>(nullable: false),
                     PlayerCount = table.Column<int>(nullable: false),
@@ -119,17 +119,21 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    Username = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(nullable: true),
-                    Avatar = table.Column<string>(nullable: true),
-                    Country = table.Column<string>(nullable: true),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Username = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
+                    AccessCode = table.Column<string>(maxLength: 256, nullable: true),
+                    RequestCount = table.Column<int>(nullable: false),
+                    Avatar = table.Column<string>(maxLength: 256, nullable: true),
+                    Country = table.Column<string>(maxLength: 256, nullable: true),
                     Division = table.Column<int>(nullable: false),
                     Level = table.Column<int>(nullable: false),
                     RatingMean = table.Column<double>(nullable: false),
                     RatingDeviation = table.Column<double>(nullable: false),
                     IsBlockedUntil = table.Column<DateTime>(nullable: true),
-                    CreatedAt = table.Column<DateTime>(nullable: false)
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: false),
+                    DeletedAt = table.Column<DateTime>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -141,7 +145,7 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PlayerId = table.Column<int>(nullable: false),
                     ConservativeRating = table.Column<double>(nullable: false),
                     TotalDecay = table.Column<int>(nullable: false),
@@ -166,7 +170,7 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     MatchId = table.Column<int>(nullable: false),
                     Status = table.Column<int>(nullable: false),
                     PlayerId = table.Column<int>(nullable: false),
@@ -185,9 +189,9 @@ namespace Pulse.Backend.Migrations
                 {
                     table.PrimaryKey("PK_MatchPlayer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MatchPlayer_Matche_MatchId",
+                        name: "FK_MatchPlayer_Match_MatchId",
                         column: x => x.MatchId,
-                        principalTable: "Matche",
+                        principalTable: "Match",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -203,7 +207,7 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PlayerId = table.Column<int>(nullable: false),
                     Type = table.Column<int>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false),
@@ -225,10 +229,11 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PlayerId = table.Column<int>(nullable: false),
-                    RefreshToken = table.Column<string>(nullable: true),
-                    IpAddress = table.Column<string>(nullable: true),
+                    RefreshToken = table.Column<string>(maxLength: 256, nullable: true),
+                    IpAddress = table.Column<string>(maxLength: 256, nullable: true),
+                    Browser = table.Column<string>(maxLength: 256, nullable: true),
                     CreatedAt = table.Column<DateTime>(nullable: false),
                     UpdatedAt = table.Column<DateTime>(nullable: false),
                     DeletedAt = table.Column<DateTime>(nullable: true)
@@ -249,10 +254,10 @@ namespace Pulse.Backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     PlayerId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Value = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(maxLength: 256, nullable: true),
+                    Value = table.Column<string>(maxLength: 256, nullable: true),
                     UpdatedAt = table.Column<DateTime>(nullable: false),
                     DeletedAt = table.Column<DateTime>(nullable: true)
                 },
@@ -306,6 +311,12 @@ namespace Pulse.Backend.Migrations
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Player_Email",
+                table: "Player",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlayerBadge_PlayerId",
                 table: "PlayerBadge",
                 column: "PlayerId");
@@ -354,7 +365,7 @@ namespace Pulse.Backend.Migrations
                 name: "PlayerSetting");
 
             migrationBuilder.DropTable(
-                name: "Matche");
+                name: "Match");
 
             migrationBuilder.DropTable(
                 name: "Player");

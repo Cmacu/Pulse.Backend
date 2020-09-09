@@ -14,7 +14,7 @@ using SendGrid.Helpers.Mail;
 namespace Pulse.Core.Services {
     public interface IEmailService {
         Task SendException(Exception ex);
-        Task SendAuthorizationLink(string email, string accessToken, string refreshToken);
+        Task SendAuthorizationLink(Player player);
         Task SendMatchmakerAddNotification(SeekModel seek);
         Task SendMatchCreatedNotification(Match match, Player player);
     }
@@ -22,10 +22,16 @@ namespace Pulse.Core.Services {
     public class EmailService : IEmailService {
         private readonly IConfiguration _configuration;
         private readonly DataContext _context;
+        private readonly string _domain;
+        private readonly string _fromAddress;
+        private readonly string _fromName;
 
         public EmailService(IConfiguration configuration, DataContext context) {
             _configuration = configuration;
             _context = context;
+            _domain = _configuration.GetValue<string>("Server:Domain");
+            _fromAddress = _configuration.GetValue<string>("Email:FromAddress");
+            _fromName = _configuration.GetValue<string>("Email:FromName");
         }
 
         private List<EmailAddress> _internalAddress {
@@ -51,11 +57,15 @@ namespace Pulse.Core.Services {
             await this.SendMany(toAddress, subject, body);
         }
 
-        public Task SendAuthorizationLink(string email, string accessToken, string refreshToken) {
-            var subject = "Pulse Authorization Link";
-            var link = $"https://app.pulsegames.io/login?token={accessToken}&refreshToken={refreshToken}";
-            var body = @$"<a href='{link}'>{link}</a>";
-            return Send(new EmailAddress(email, ""), subject, body);
+        public async Task SendAuthorizationLink(Player player) {
+            var link = $"{_domain}/auth/login?email={player.Email}&accessCode={player.AccessCode}";
+            var subject = "Pulse Authorization Request";
+            var message = "";
+            if (!String.IsNullOrEmpty(player.Username)) message += $"Cheers {player.Username},<br><br>";
+            message += $"Pulse Access Code: {player.AccessCode}<br><br>";
+            message += $"Or click here: <a href='{link}'>{link}</a><br><br>";
+            message += $"You are receiving this message because someone requested access via <a href='{_domain}'>{_domain}</a>.<br>";
+            await Send(new EmailAddress(player.Email, player.Username), subject, message);
         }
 
         public async Task SendMatchCreatedNotification(Match match, Player player) {
@@ -67,7 +77,7 @@ namespace Pulse.Core.Services {
                 <br><br>
                 We found a match for you! Open the official Through The Ages app to play your game. Good luck, and have fun!
                 <br><br>
-                You can disable email notifications from the settings: https://app.ttapulse.com/settings#emailNotifications
+                You can disable email notifications from the settings: {_domain}/settings#emailNotifications
             ";
             await this.Send(new EmailAddress(player.Email, player.Username), subject, body);
         }
@@ -81,21 +91,23 @@ namespace Pulse.Core.Services {
             await Task.WhenAll(sends);
         }
 
-        private async Task<Response> Send(EmailAddress to, string subject, string body) {
-            _context.EmailLog.Add(new EmailLog() {
+        private Task<Response> Send(EmailAddress to, string subject, string body) {
+            Console.WriteLine("Subject: " + subject);
+            var log = new EmailLog() {
                 Timestamp = DateTime.UtcNow,
-                    To = to.Email,
-                    Subject = subject,
-                    Body = body
-            });
-            _context.SaveChanges();
+                To = to.Email,
+                Subject = subject,
+                Body = body
+            };
+            _context.EmailLog.Add(log);
+            _context.SaveChangesAsync();
 
             var apiKey = _configuration.GetValue<string>("Email:ApiKey");
             var client = new SendGridClient(apiKey);
-            var from = new EmailAddress(_configuration.GetValue<string>("Email:FromAddr"), _configuration.GetValue<string>("Email:FromName"));
+            var from = new EmailAddress(_fromAddress, _fromName);
             var plainTextBody = body.Replace("<br>", Environment.NewLine);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextBody, body);
-            return await client.SendEmailAsync(msg);
+            return client.SendEmailAsync(msg);
         }
     }
 }

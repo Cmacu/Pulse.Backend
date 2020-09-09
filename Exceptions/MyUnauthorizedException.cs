@@ -1,10 +1,8 @@
 ﻿using System;
 
-namespace Pulse.Exceptions
-{
-    public class MyUnauthorizedException : Exception
-    {
-        public MyUnauthorizedException() : base() {}
-        public MyUnauthorizedException(string message) : base(message) {}
+namespace Pulse.Exceptions {
+    public class PulseUnauthorizedException : Exception {
+        public PulseUnauthorizedException() : base() {}
+        public PulseUnauthorizedException(string message) : base(message) {}
     }
 }
