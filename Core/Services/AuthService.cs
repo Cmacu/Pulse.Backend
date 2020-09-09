@@ -14,21 +14,15 @@ using Pulse.Core.Models;
 using Pulse.Exceptions;
 
 namespace Pulse.Core.Services {
-    public interface IAuthService {
-        void SendAccessCode(string email);
-        AuthModel Login(string email, string accessCode, string ipAddress, string browser);
-        AuthModel Refresh(string accessToken, string refreshToken, string ipAddress);
-    }
-
-    public class AuthService : IAuthService {
+    public class AuthService {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
-        // private readonly IRatingService _ratingService;
+        // private readonly RatingService _ratingService;
         private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler;
-        private readonly IEmailService _emailService;
+        private readonly EmailService _emailService;
         private readonly int _expirySeconds;
         private readonly byte[] _key;
-        public AuthService(DataContext context, IConfiguration configuration, IEmailService emailService) {
+        public AuthService(DataContext context, IConfiguration configuration, EmailService emailService) {
             _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             _context = context;
             _configuration = configuration;

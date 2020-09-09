@@ -9,10 +9,9 @@ namespace Pulse.Controllers {
   [ApiController]
   [Route("[controller]")]
   public class AuthController : ControllerBase {
-    private readonly string _ipAddress;
-    private readonly IAuthService _authService;
+    private readonly AuthService _authService;
 
-    public AuthController(IAuthService authService) {
+    public AuthController(AuthService authService) {
       _authService = authService;
     }
 
@@ -48,7 +47,8 @@ namespace Pulse.Controllers {
     [Route("refresh")]
     public ActionResult<AuthModel> Refresh(string accessToken, string refreshToken) {
       try {
-        return _authService.Refresh(accessToken, refreshToken, _ipAddress);
+        var ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+        return _authService.Refresh(accessToken, refreshToken, ipAddress);
       } catch (SecurityTokenException ex) {
         return Unauthorized(ex.Message);
       } catch {

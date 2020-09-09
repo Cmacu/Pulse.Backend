@@ -9,23 +9,13 @@ using Pulse.Matchmaker.Services;
 using Pulse.Rank.Entities;
 using Pulse.Rank.Models;
 
-namespace Pulse.Rank.Services
-{
-    public interface ILeaderboardService
-    {
-        PagedLeaderboardModel Get(int skip, int take);
-        List<LeaderboardLog> GetLog(string username);
-        void RemoveCache();
-        void Truncate();
-    }
-
-    public class LeaderboardService : ILeaderboardService
-    {
+namespace Pulse.Rank.Services {
+    public class LeaderboardService {
         private readonly IConfiguration _configuration;
         private readonly DataContext _context;
-        private readonly IMatchService _matchService;
-        private readonly IRatingService _ratingService;
-        private readonly IDecayService _decayService;
+        private readonly MatchService _matchService;
+        private readonly RatingService _ratingService;
+        private readonly DecayService _decayService;
         private readonly IMemoryCache _cache;
         private readonly string _leaderboardKey;
         private readonly DateTime _seasonStart;
@@ -33,12 +23,11 @@ namespace Pulse.Rank.Services
         public LeaderboardService(
             IConfiguration configuration,
             DataContext context,
-            IMatchService matchService,
-            IRatingService ratingService,
-            IDecayService decayService,
+            MatchService matchService,
+            RatingService ratingService,
+            DecayService decayService,
             IMemoryCache cache
-        )
-        {
+        ) {
             _context = context;
             _configuration = configuration;
             _matchService = matchService;
@@ -49,8 +38,7 @@ namespace Pulse.Rank.Services
             _seasonStart = _configuration.GetValue<DateTime>("Leaderboard:SeasonStart");
         }
 
-        public List<LeaderboardLog> GetLog(string username)
-        {
+        public List<LeaderboardLog> GetLog(string username) {
             return _context.LeaderboardLog
                 .Include(x => x.Player)
                 .Where(x => (username == null || x.Player.Username == username) &&
@@ -59,8 +47,7 @@ namespace Pulse.Rank.Services
                 .ToList();
         }
 
-        public PagedLeaderboardModel Get(int skip, int take)
-        {
+        public PagedLeaderboardModel Get(int skip, int take) {
             var leaderboard = GetLeaderboard();
 
             var rows = leaderboard
@@ -68,26 +55,22 @@ namespace Pulse.Rank.Services
                 .Take(take)
                 .ToList();
 
-            return new PagedLeaderboardModel()
-            {
+            return new PagedLeaderboardModel() {
                 Total = leaderboard.Count(),
                     Results = rows,
                     CreatedAt = leaderboard.Last().CreatedAt
             };
         }
 
-        public void RemoveCache()
-        {
+        public void RemoveCache() {
             _cache.Remove(_leaderboardKey);
         }
 
-        public void Truncate()
-        {
+        public void Truncate() {
             _context.Database.ExecuteSqlRaw("DELETE from LeaderboardLog");
         }
 
-        private List<LeaderboardModel> GetLeaderboard()
-        {
+        private List<LeaderboardModel> GetLeaderboard() {
             DateTime lastGeneratedAt;
             List<LeaderboardModel> leaderboard;
 
@@ -98,8 +81,7 @@ namespace Pulse.Rank.Services
 
             var newGeneratedAt = GenerateLeaderboardLogs(lastGeneratedAt);
 
-            if (leaderboard == null || lastGeneratedAt < newGeneratedAt)
-            {
+            if (leaderboard == null || lastGeneratedAt < newGeneratedAt) {
                 leaderboard = LoadLeaderboard(newGeneratedAt);
                 _cache.Set(_leaderboardKey, leaderboard);
             }
@@ -107,14 +89,12 @@ namespace Pulse.Rank.Services
             return leaderboard;
         }
 
-        private List<LeaderboardModel> LoadLeaderboard(DateTime day)
-        {
+        private List<LeaderboardModel> LoadLeaderboard(DateTime day) {
             return _context.LeaderboardLog
                 .Include(x => x.Player)
                 .Where(x => x.CreatedAt == day &&
                     (x.DeletedAt == null || x.DeletedAt > DateTime.UtcNow))
-                .Select(x => new LeaderboardModel()
-                {
+                .Select(x => new LeaderboardModel() {
                     PlayerId = x.PlayerId,
                         Username = x.Player.Username,
                         Avatar = x.Player.Avatar,
@@ -129,11 +109,9 @@ namespace Pulse.Rank.Services
                 .ToList();
         }
 
-        private DateTime GenerateLeaderboardLogs(DateTime lastGeneratedAt)
-        {
+        private DateTime GenerateLeaderboardLogs(DateTime lastGeneratedAt) {
             _matchService.CompleteMatches();
-            while ((DateTime.UtcNow - lastGeneratedAt).TotalHours > 24d)
-            {
+            while ((DateTime.UtcNow - lastGeneratedAt).TotalHours > 24d) {
                 lastGeneratedAt = lastGeneratedAt.AddHours(24);
                 this.ComputeDay(lastGeneratedAt);
             }
@@ -141,8 +119,7 @@ namespace Pulse.Rank.Services
             return lastGeneratedAt;
         }
 
-        private DateTime GetLastGeneratedAt()
-        {
+        private DateTime GetLastGeneratedAt() {
             var lastGeneratedAt = _context.LeaderboardLog.OrderByDescending(x => x.CreatedAt).Select(x => x.CreatedAt).FirstOrDefault();
             if (lastGeneratedAt == null || lastGeneratedAt < _seasonStart)
                 lastGeneratedAt = _seasonStart;
@@ -150,19 +127,16 @@ namespace Pulse.Rank.Services
             return lastGeneratedAt;
         }
 
-        private void ComputeDay(DateTime day)
-        {
+        private void ComputeDay(DateTime day) {
             var rows = _context.Player
                 .Include(x => x.Matches)
                 .ThenInclude(x => x.Match)
                 .Where(x => x.Division == Division.Master)
-                .Select(x => new
-                {
+                .Select(x => new {
                     LastMatch = x.Matches.Where(x => x.Match.StartDate < day).OrderByDescending(x => x.Match.StartDate).First(),
                         Player = x
                 })
-                .Select(x => new LeaderboardLog()
-                {
+                .Select(x => new LeaderboardLog() {
                     CreatedAt = day,
                         ConservativeRating = _ratingService.GetConservative(x.LastMatch.NewRatingMean, x.LastMatch.NewRatingDeviation),
                         TotalDecay = _decayService.GetDecayValues(x.LastMatch.DecayDays, x.LastMatch.Match.StartDate, day),
@@ -173,15 +147,13 @@ namespace Pulse.Rank.Services
                 .OrderByDescending(x => x.ConservativeRating - x.TotalDecay)
                 .ToList();
 
-            for (int i = 0; i < rows.Count; i++)
-            {
+            for (int i = 0; i < rows.Count; i++) {
                 rows[i].Rank = i + 1;
             }
 
             var players = _context.Player.Where(x => x.Division == Division.Master).ToList();
 
-            foreach (var player in players)
-            {
+            foreach (var player in players) {
                 player.Level = rows.Where(x => x.PlayerId == player.Id).Select(x => x.Rank).FirstOrDefault();
             }
 

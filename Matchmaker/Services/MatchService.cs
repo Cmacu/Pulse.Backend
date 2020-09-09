@@ -13,37 +13,23 @@ using Pulse.Matchmaker.Models;
 using Pulse.Rank.Entities;
 using Pulse.Rank.Services;
 
-namespace Pulse.Matchmaker.Services
-{
-    public interface IMatchService
-    {
-        Match CreateMatch(List<int> playerIds, int gameId);
-        Match Find(int matchId);
-        PagedMatchModel GetRecent(string player, string opponent, int skip, int take);
-        PagedMatchModel GetRecent(int? playerId, int? opponentId, int skip, int take);
-        MatchModel UpdateMatch(Match match, ResultModel result);
-        Match GetLastMatchByPlayerId(int playerId);
-        void CompleteMatches();
-    }
-
-    public class MatchService : IMatchService
-    {
+namespace Pulse.Matchmaker.Services {
+    public class MatchService {
         private readonly IConfiguration _configuration;
-        private readonly INotificationService _notificationService;
-        private readonly IRatingService _ratingService;
-        private readonly IDecayService _decayService;
+        private readonly NotificationService _notificationService;
+        private readonly RatingService _ratingService;
+        private readonly DecayService _decayService;
         private readonly DataContext _context;
         private readonly IMapper _mapper;
 
         public MatchService(
             IConfiguration configuration,
-            INotificationService notificationService,
-            IRatingService ratingService,
-            IDecayService decayService,
+            NotificationService notificationService,
+            RatingService ratingService,
+            DecayService decayService,
             DataContext context,
             IMapper mapper
-        )
-        {
+        ) {
             _configuration = configuration;
             _notificationService = notificationService;
             _ratingService = ratingService;
@@ -52,19 +38,16 @@ namespace Pulse.Matchmaker.Services
             _mapper = mapper;
         }
 
-        public Match Find(int matchId)
-        {
+        public Match Find(int matchId) {
             return _context.Match
                 .Include(x => x.MatchPlayers)
                 .ThenInclude(x => x.Player)
                 .FirstOrDefault(x => x.Id == matchId);
         }
 
-        public MatchModel UpdateMatch(Match match, ResultModel result)
-        {
+        public MatchModel UpdateMatch(Match match, ResultModel result) {
             // Retrieve data from the latest match information
-            if (match.Status == MatchStatus.InProgress && match.UpdatedAt.AddSeconds(30) < DateTime.UtcNow)
-            {
+            if (match.Status == MatchStatus.InProgress && match.UpdatedAt.AddSeconds(30) < DateTime.UtcNow) {
                 match = UpdateMatchResult(match, result);
                 match.UpdatedAt = DateTime.UtcNow;
                 _context.SaveChanges();
@@ -78,12 +61,10 @@ namespace Pulse.Matchmaker.Services
         /// </summary>
         /// <param name="playerIds">The IDs of the players in the match.</param>
         /// <returns>The database ID of the new match.</returns>
-        public Match CreateMatch(List<int> playerIds, int gameId)
-        {
+        public Match CreateMatch(List<int> playerIds, int gameId) {
             var name = GenerateMatchName();
 
-            var match = new Match()
-            {
+            var match = new Match() {
                 Name = name,
                 StartDate = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
@@ -94,10 +75,8 @@ namespace Pulse.Matchmaker.Services
                 .Where(x => playerIds.Contains(x.Id))
                 .ToList();
 
-            foreach (var player in players)
-            {
-                match.MatchPlayers.Add(new MatchPlayer()
-                {
+            foreach (var player in players) {
+                match.MatchPlayers.Add(new MatchPlayer() {
                     Player = player,
                         PlayerId = player.Id,
                         Position = playerIds.IndexOf(player.Id),
@@ -115,8 +94,7 @@ namespace Pulse.Matchmaker.Services
             return match;
         }
 
-        public Match GetLastMatchByPlayerId(int playerId)
-        {
+        public Match GetLastMatchByPlayerId(int playerId) {
             return _context.Match
                 .Include(x => x.MatchPlayers)
                 .ThenInclude(x => x.Player)
@@ -125,8 +103,7 @@ namespace Pulse.Matchmaker.Services
                 .FirstOrDefault();
         }
 
-        public PagedMatchModel GetRecent(int? playerId, int? opponentId, int skip, int take)
-        {
+        public PagedMatchModel GetRecent(int? playerId, int? opponentId, int skip, int take) {
             var q = _context.Match
                 .Include(x => x.MatchPlayers)
                 .ThenInclude(x => x.Player)
@@ -145,14 +122,12 @@ namespace Pulse.Matchmaker.Services
 
             var results = _mapper.Map<List<MatchModel>>(match);
 
-            return new PagedMatchModel()
-            {
+            return new PagedMatchModel() {
                 Total = total,
                     Results = results
             };
         }
-        public PagedMatchModel GetRecent(string player, string opponent, int skip, int take)
-        {
+        public PagedMatchModel GetRecent(string player, string opponent, int skip, int take) {
             var q = _context.Match
                 .Include(x => x.MatchPlayers)
                 .ThenInclude(x => x.Player)
@@ -171,37 +146,30 @@ namespace Pulse.Matchmaker.Services
 
             var results = _mapper.Map<List<MatchModel>>(match);
 
-            return new PagedMatchModel()
-            {
+            return new PagedMatchModel() {
                 Total = total,
                     Results = results
             };
         }
 
-        public void CompleteMatches()
-        {
+        public void CompleteMatches() {
             var matches = _context.Match
                 .Include(x => x.MatchPlayers)
                 .ThenInclude(x => x.Player)
                 .Where(x => x.Status == MatchStatus.InProgress && x.StartDate < DateTime.UtcNow.AddHours(-2))
                 .ToList();
 
-            foreach (var match in matches)
-            {
-                try
-                {
+            foreach (var match in matches) {
+                try {
                     var result = new ResultModel();
                     UpdateMatch(match, result);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     _notificationService.ExceptionCaught(ex);
                 }
             }
         }
 
-        private Match UpdateMatchResult(Match match, ResultModel result)
-        {
+        private Match UpdateMatchResult(Match match, ResultModel result) {
             match.Status = result.Status;
 
             if (match.Status == MatchStatus.InProgress)
@@ -209,15 +177,13 @@ namespace Pulse.Matchmaker.Services
 
             // Match is over. Handle match completion
             match.EndDate = DateTime.UtcNow;
-            foreach (var matchPlayer in match.MatchPlayers)
-            {
+            foreach (var matchPlayer in match.MatchPlayers) {
                 this.UpdateMatchPlayer(matchPlayer, result);
             }
 
             _ratingService.RateMatch(match);
 
-            foreach (var matchPlayer in match.MatchPlayers)
-            {
+            foreach (var matchPlayer in match.MatchPlayers) {
                 matchPlayer.Player.RatingMean = matchPlayer.NewRatingMean;
                 matchPlayer.Player.RatingDeviation = matchPlayer.NewRatingDeviation;
             }
@@ -225,8 +191,7 @@ namespace Pulse.Matchmaker.Services
             return match;
         }
 
-        private int GetPlayerDecay(Player player)
-        {
+        private int GetPlayerDecay(Player player) {
             if (player.Division != Division.Master) return 0;
             var lastMatch = this.GetLastMatchByPlayerId(player.Id);
             if (lastMatch == null) return 0;
@@ -234,8 +199,7 @@ namespace Pulse.Matchmaker.Services
             return _decayService.GetDecaySteps(previousDecay, lastMatch.StartDate);
         }
 
-        private void UpdateMatchPlayer(MatchPlayer matchPlayer, ResultModel result)
-        {
+        private void UpdateMatchPlayer(MatchPlayer matchPlayer, ResultModel result) {
             var username = matchPlayer.Player.Username;
             var player = result.Players.First(x => x.Username == username);
             matchPlayer.Score = player.Score;
@@ -249,8 +213,7 @@ namespace Pulse.Matchmaker.Services
             matchPlayer.Player.Level = newDivision.Level;
         }
 
-        private string GenerateMatchName()
-        {
+        private string GenerateMatchName() {
             var r = new Random();
             return $"Pulse {r.Next(1000, 9999)}";
         }

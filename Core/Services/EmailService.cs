@@ -12,14 +12,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 
 namespace Pulse.Core.Services {
-    public interface IEmailService {
-        Task SendException(Exception ex);
-        Task SendAuthorizationLink(Player player);
-        Task SendMatchmakerAddNotification(SeekModel seek);
-        Task SendMatchCreatedNotification(Match match, Player player);
-    }
-
-    public class EmailService : IEmailService {
+    public class EmailService {
         private readonly IConfiguration _configuration;
         private readonly DataContext _context;
         private readonly string _domain;
@@ -43,21 +36,21 @@ namespace Pulse.Core.Services {
             }
         }
 
-        public async Task SendException(Exception ex) {
+        public async void SendException(Exception ex) {
             var toAddress = _internalAddress;
             var subject = $"Pulse Unhandled: {ex.Message}";
             var body = ex.ToString();
             await this.SendMany(toAddress, subject, body);
         }
 
-        public async Task SendMatchmakerAddNotification(SeekModel seek) {
+        public async void SendMatchmakerAddNotification(SeekModel seek) {
             var toAddress = _internalAddress;
             var subject = $"Pulse: PlayerId {seek.Player} joined the pool";
             var body = JsonConvert.SerializeObject(seek);
             await this.SendMany(toAddress, subject, body);
         }
 
-        public async Task SendAuthorizationLink(Player player) {
+        public async void SendAuthorizationLink(Player player) {
             var link = $"{_domain}/auth/login?email={player.Email}&accessCode={player.AccessCode}";
             var subject = "Pulse Authorization Request";
             var message = "";
@@ -68,7 +61,7 @@ namespace Pulse.Core.Services {
             await Send(new EmailAddress(player.Email, player.Username), subject, message);
         }
 
-        public async Task SendMatchCreatedNotification(Match match, Player player) {
+        public async void SendMatchCreatedNotification(Match match, Player player) {
             var versus = String.Join(" vs ", match.MatchPlayers.OrderBy(x => x.Position).Select(x => x.Player.Username));
 
             var subject = $"{match.Name} in progress! {versus}";

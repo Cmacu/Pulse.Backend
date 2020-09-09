@@ -2,56 +2,40 @@ using System.Collections.Generic;
 using System.Linq;
 using Pulse.Matchmaker.Models;
 
-namespace Pulse.Matchmaker.Services
-{
-    public abstract class MatchmakerMatcher
-    {
-        public MatchmakerMatcher(IReadOnlyList<SeekModel> sortedPlayers)
-        {
+namespace Pulse.Matchmaker.Services {
+    public abstract class MatchmakerMatcher {
+        public MatchmakerMatcher(IReadOnlyList<SeekModel> sortedPlayers) {
 
         }
 
     }
-    public interface IMatchmakerMatcher
-    {
-        void createPotentialMatches(int playersPerMatch);
-        List<BatchModel> getMatches(int scoreLimit);
-    }
 
-    public class GroupAndSortMatcher : MatchmakerMatcher, IMatchmakerMatcher
-    {
+    public class GroupAndSortMatcher : MatchmakerMatcher {
         private IReadOnlyList<SeekModel> _sortedPlayers;
         private List<PotentialMatchModel> _potentialMatches = new List<PotentialMatchModel>();
-        public GroupAndSortMatcher(IReadOnlyList<SeekModel> sortedPlayers) : base(sortedPlayers)
-        {
+        public GroupAndSortMatcher(IReadOnlyList<SeekModel> sortedPlayers) : base(sortedPlayers) {
             this._sortedPlayers = sortedPlayers;
         }
 
-        public void createPotentialMatches(int playersPerMatch)
-        {
+        public void createPotentialMatches(int playersPerMatch) {
             var potentialCount = this._sortedPlayers.Count - playersPerMatch;
-            for (int i = 0; i <= potentialCount; i++)
-            {
+            for (int i = 0; i <= potentialCount; i++) {
                 var potentialPlayers = new List<SeekModel>();
                 potentialPlayers.Add(this._sortedPlayers[i]);
-                for (int j = 1; j < playersPerMatch; j++)
-                {
+                for (int j = 1; j < playersPerMatch; j++) {
                     potentialPlayers.Add(this._sortedPlayers[i + j]);
                 }
                 this._potentialMatches.Add(new PotentialMatchModel(potentialPlayers));
             }
         }
 
-        public List<BatchModel> getMatches(int scoreLimit)
-        {
+        public List<BatchModel> getMatches(int scoreLimit) {
             var matches = new List<BatchModel>();
             var matchedPlayers = new List<string>();
-            foreach (var potentialMatchModel in _potentialMatches.OrderBy(x => x.Score))
-            {
+            foreach (var potentialMatchModel in _potentialMatches.OrderBy(x => x.Score)) {
                 if (potentialMatchModel.Score > scoreLimit) break;
                 var players = potentialMatchModel.PlayerList;
-                if (players.Where(player => matchedPlayers.Contains(player)).Count() > 0)
-                {
+                if (players.Where(player => matchedPlayers.Contains(player)).Count() > 0) {
                     continue;
                 }
                 matchedPlayers.AddRange(players);

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Pulse.Core.Services;
 using Pulse.Matchmaker.Services;
 using Pulse.Rank.Services;
@@ -23,32 +22,34 @@ namespace Pulse.Configuration {
     public static void ConfigureService(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env) {
       services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-      services.AddScoped<IAuthService, AuthService>();
-      services.AddScoped<INotificationService, NotificationService>();
-      services.AddScoped<IEmailService, EmailService>();
-      services.AddScoped<IPlayerService, PlayerService>();
-      services.AddScoped<IPlayerSettingService, PlayerSettingService>();
+      services.AddScoped<AuthService>();
+      services.AddScoped<NotificationService>();
+      services.AddScoped<EmailService>();
+      services.AddScoped<PlayerService>();
+      services.AddScoped<PlayerSettingService>();
 
-      services.AddSingleton<IMatchmakerPoolSingleton, MatchmakerPoolSingleton>();
-      services.AddScoped<IMatchService, MatchService>();
-      services.AddScoped<IMatchmakerService, MatchmakerService>();
-      services.AddScoped<IMatchmakerLogService, MatchmakerLogService>();
+      services.AddSingleton<MatchmakerPoolSingleton>();
+      services.AddScoped<MatchService>();
+      services.AddScoped<MatchmakerService>();
+      services.AddScoped<MatchmakerLogService>();
 
-      services.AddScoped<ILeaderboardService, LeaderboardService>();
-      services.AddScoped<IRatingService, RatingService>();
-      services.AddScoped<IDecayService, DecayService>();
+      services.AddScoped<LeaderboardService>();
+      services.AddScoped<RatingService>();
+      services.AddScoped<DecayService>();
 
       if (env.IsDevelopment()) {
         services.AddDbContext<DataContext>(options =>
           options.UseMySql(
             configuration.GetConnectionString("DefaultConnection")
-          )
+          ),
+          ServiceLifetime.Transient
         );
       } else {
         services.AddDbContext<DataContext>(options =>
           options.UseSqlServer(
             configuration.GetConnectionString("DefaultConnection")
-          )
+          ),
+          ServiceLifetime.Transient
         );
       }
     }
