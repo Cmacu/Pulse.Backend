@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -13,113 +15,143 @@ using Pulse.Core.Models;
 using Pulse.Exceptions;
 using Pulse.Rank.Entities;
 
-namespace Pulse.Core.Services
-{
-    public interface IAuthService
-    {
-        AuthModel Authenticate(string token, string refreshToken, string ipAddress);
-        AuthModel Refresh(string jwt, string jwtRefresh, string ipAddress);
+namespace Pulse.Core.Services {
+    public interface IAuthService {
+        string Register(string email, string ipAddress);
+        AuthModel Refresh(string token, string refreshToken, string ipAddress);
     }
 
-    public class AuthService : IAuthService
-    {
+    public class AuthService : IAuthService {
         private readonly DataContext _context;
         private readonly IConfiguration _configuration;
         // private readonly IRatingService _ratingService;
         private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler;
+        private readonly IEmailService _emailService;
+        private readonly int _expirySeconds;
         private readonly byte[] _key;
-
-        public AuthService(DataContext context, IConfiguration configuration)
-        {
+        public AuthService(DataContext context, IConfiguration configuration, IEmailService emailService) {
             _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             _context = context;
             _configuration = configuration;
-            // _ratingService = ratingService;
+            _emailService = emailService;
 
+            _expirySeconds = int.Parse(_configuration["Server:TokenExpirySeconds"]);
             _key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
         }
 
-        public AuthModel Authenticate(string token, string refreshToken, string ipAddress)
-        {
-            var session = _context.PlayerSession.Include(x => x.Player).Where(x => x.RefreshToken == refreshToken).FirstOrDefault();
-            // Generate and save app JWT token
-            var claims = new List<Claim>()
-            {
-                new Claim(ClaimTypes.Name, session.Player.Username.ToString()),
-                new Claim(ClaimTypes.NameIdentifier, session.Player.Id.ToString())
+        public string Register(string email, string ipAddress) {
+            if (!IsValidEmail(email))
+                throw new MyUnauthorizedException("Invalid email: " + email);
+
+            var player = _context.Player.FirstOrDefault(x => x.Email == email);
+            if (player == null) {
+                player = new Player() { Email = email };
+            }
+            var claims = new List<Claim>() {
+                new Claim(ClaimTypes.Email, email)
             };
-            var authModel = GenerateJwt(claims);
+            var authModel = new AuthModel {
+                AccessToken = GenerateToken(claims),
+                ExpiresIn = _expirySeconds,
+                RefreshToken = Guid.NewGuid().ToString()
+            };
 
-            // player.Sessions.Add(new PlayerSession()
-            // {
-            //     RefreshToken = authModel.RefreshToken,
-            //         CreatedAt = DateTime.UtcNow,
-            //         UpdatedAt = DateTime.UtcNow,
-            //         IpAddress = ipAddress
-            // });
+            var session = new PlayerSession {
+                RefreshToken = authModel.RefreshToken,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IpAddress = ipAddress
+            };
+            player.Sessions.Add(session);
+            _emailService.SendAuthorizationLink(email, authModel.AccessToken, authModel.RefreshToken);
+            _context.SaveChangesAsync();
 
-            _context.SaveChanges();
-
-            return authModel;
+            return "Please check your email for access link";
         }
 
-        public AuthModel Refresh(string jwt, string jwtRefresh, string ipAddress)
-        {
-            var parameters = new TokenValidationParameters()
-            {
+        public AuthModel Refresh(string token, string refreshToken, string ipAddress) {
+            var parameters = new TokenValidationParameters() {
                 ValidateAudience = false,
                 ValidateIssuer = false,
                 ValidateLifetime = false,
                 IssuerSigningKey = new SymmetricSecurityKey(_key),
             };
 
-            var principal = _jwtSecurityTokenHandler.ValidateToken(jwt, parameters, out var securityToken);
+            var principal = _jwtSecurityTokenHandler.ValidateToken(token, parameters, out var securityToken);
 
             if (!(securityToken is JwtSecurityToken jwtSecurityToken) || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 throw new SecurityTokenException("Invalid access token");
 
-            var playerId = int.Parse(principal.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var email = principal.FindFirst(ClaimTypes.Email).Value;
             var refreshTokenExpirationDays = _configuration.GetValue<int>("Server:RefreshTokenExpirationDays");
-            var auth = _context.PlayerSession.FirstOrDefault(x =>
-                x.RefreshToken == jwtRefresh &&
-                x.PlayerId == playerId &&
-                x.DeletedAt == null &&
-                x.UpdatedAt > DateTime.UtcNow.AddDays(-1 * refreshTokenExpirationDays));
+            var session = _context.PlayerSession
+                .Include(x => x.Player)
+                .FirstOrDefault(x =>
+                    x.RefreshToken == refreshToken &&
+                    x.Player.Email == email &&
+                    x.DeletedAt == null &&
+                    x.UpdatedAt > DateTime.UtcNow.AddDays(-1 * refreshTokenExpirationDays)
+                );
 
-            if (auth == null)
+            if (session == null)
                 throw new SecurityTokenException("Invalid refresh token");
 
-            var newJwt = GenerateJwt(principal.Claims);
+            var authModel = new AuthModel {
+                AccessToken = GenerateToken(principal.Claims),
+                ExpiresIn = _expirySeconds,
+                RefreshToken = refreshToken
+            };
 
-            // Keep the same refresh token, so it can be reused
-            newJwt.RefreshToken = jwtRefresh;
-
-            return newJwt;
+            return authModel;
         }
 
-        private AuthModel GenerateJwt(IEnumerable<Claim> claims)
-        {
-            var jwtRefresh = GenerateToken();
-            var expirySeconds = int.Parse(_configuration["Jwt:ExpirySeconds"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
+        private string GenerateToken(IEnumerable<Claim> claims) {
+            var expirySeconds = int.Parse(_configuration["Server:TokenExpirySeconds"]);
+            var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddSeconds(expirySeconds),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(_key), SecurityAlgorithms.HmacSha256Signature)
             };
-            var jwt = _jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
+            var token = _jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
 
-            return new AuthModel()
-            {
-                AccessToken = _jwtSecurityTokenHandler.WriteToken(jwt),
-                    ExpiresIn = expirySeconds,
-                    RefreshToken = jwtRefresh
-            };
+            return _jwtSecurityTokenHandler.WriteToken(token);
         }
 
-        private string GenerateToken()
-        {
-            return Guid.NewGuid().ToString();
+        private bool IsValidEmail(string email) {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try {
+                // Normalize the domain
+                email = Regex.Replace(email, @"(@)(.+)$", DomainMapper,
+                    RegexOptions.None, TimeSpan.FromMilliseconds(200));
+
+                // Examines the domain part of the email and normalizes it.
+                string DomainMapper(Match match) {
+                    // Use IdnMapping class to convert Unicode domain names.
+                    var idn = new IdnMapping();
+
+                    // Pull out and process domain name (throws ArgumentException on invalid)
+                    var domainName = idn.GetAscii(match.Groups[2].Value);
+
+                    return match.Groups[1].Value + domainName;
+                }
+            } catch (RegexMatchTimeoutException e) {
+                Console.WriteLine("Invalid email: " + e.Message);
+                return false;
+            } catch (ArgumentException e) {
+                Console.WriteLine("Invalid email: " + e.Message);
+                return false;
+            }
+
+            try {
+                return Regex.IsMatch(email,
+                    @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
+                    @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
+                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+            } catch (RegexMatchTimeoutException) {
+                return false;
+            }
         }
     }
 }
