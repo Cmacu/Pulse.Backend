@@ -27,37 +27,13 @@ namespace Pulse.Rank.Services {
 
     public class RatingService {
         private readonly DataContext _context;
-        private readonly IConfiguration _configuration;
+        private readonly RatingConfiguration _rating;
         private readonly DecayService _decayService;
 
-        private readonly double _offset;
-        private readonly double _multiplier;
-        private readonly double _betaDivisor;
-        private readonly double _drawProbability;
-        private readonly double _dynamicsFactorDivisor;
-        private readonly double _initialMean;
-        private readonly double _initialDeviation;
-        private readonly double _conservativeMultiplier;
-        private readonly double _minDeviation;
-        private readonly double _minDelta;
-        private readonly double _maxDelta;
-
-        public RatingService(DataContext context, IConfiguration configuration, DecayService decayService) {
+        public RatingService(DataContext context, ApiConfiguration configuration, DecayService decayService) {
             _context = context;
-            _configuration = configuration;
             _decayService = decayService;
-
-            _offset = _configuration.GetValue<int>("Ratings:Offset");
-            _multiplier = _configuration.GetValue<int>("Ratings:Multiplier");
-            _betaDivisor = _configuration.GetValue<double>("Ratings:BetaDivisor");
-            _drawProbability = _configuration.GetValue<double>("Ratings:DrawProbability");
-            _dynamicsFactorDivisor = _configuration.GetValue<double>("Ratings:DynamicsFactorDivisor");
-            _initialMean = _configuration.GetValue<double>("Ratings:InitialMean");
-            _initialDeviation = _configuration.GetValue<double>("Ratings:InitialDeviation");
-            _conservativeMultiplier = _configuration.GetValue<double>("Ratings:ConservativeMultiplier");
-            _minDeviation = _configuration.GetValue<double>("Ratings:MinDeviation");
-            _minDelta = _configuration.GetValue<double>("Ratings:MinDelta");
-            _maxDelta = _configuration.GetValue<double>("Ratings:MaxDelta");
+            _rating = configuration.Rating;
         }
 
         public void RerateAll() {
@@ -114,7 +90,13 @@ namespace Pulse.Rank.Services {
         }
 
         public void RateMatch(Match match) {
-            var gameInfo = new GameInfo(_initialMean, _initialDeviation, _initialMean / _betaDivisor, _initialMean / _dynamicsFactorDivisor, _drawProbability);
+            var gameInfo = new GameInfo(
+                _rating.InitialMean,
+                _rating.InitialDeviation,
+                _rating.InitialMean / _rating.BetaDivisor,
+                _rating.InitialMean / _rating.DynamicsFactorDivisor,
+                _rating.DrawProbability
+            );
 
             var teams = new List<Dictionary<Moserware.Skills.Player, Rating>>();
             var players = new Dictionary<MatchPlayer, Moserware.Skills.Player>();
@@ -178,12 +160,12 @@ namespace Pulse.Rank.Services {
         }
 
         public void Reset(Core.Entities.Player player) {
-            player.RatingMean = _initialMean;
-            player.RatingDeviation = _initialDeviation;
+            player.RatingMean = _rating.InitialMean;
+            player.RatingDeviation = _rating.InitialDeviation;
         }
 
         public double GetConservative(double ratingMean, double ratingDeviation) {
-            return _offset + (_multiplier * (ratingMean - (ratingDeviation * _conservativeMultiplier)));
+            return _rating.Offset + (_rating.Multiplier * (ratingMean - (ratingDeviation * _rating.ConservativeMultiplier)));
         }
 
         private double GetMean(double oldMean, double newMean) {
@@ -193,15 +175,15 @@ namespace Pulse.Rank.Services {
             var deltaAbs = Math.Abs(delta);
             var deltaSign = Math.Sign(delta);
 
-            if (deltaAbs < _minDelta) return oldMean + _minDelta * deltaSign;
-            if (deltaAbs > _maxDelta) return oldMean + _maxDelta * deltaSign;
+            if (deltaAbs < _rating.MinDelta) return oldMean + _rating.MinDelta * deltaSign;
+            if (deltaAbs > _rating.MaxDelta) return oldMean + _rating.MaxDelta * deltaSign;
 
             return newMean;
         }
 
         private double GetDeviation(double oldDeviation, double newDeviation) {
             if (newDeviation > oldDeviation) return oldDeviation;
-            if (newDeviation < _minDeviation) return _minDeviation;
+            if (newDeviation < _rating.MinDeviation) return _rating.MinDeviation;
             return newDeviation;
         }
 
@@ -214,8 +196,8 @@ namespace Pulse.Rank.Services {
 
         private PlayerRating GetDefaultRating() {
             return new PlayerRating {
-                RatingMean = _initialMean,
-                    RatingDeviation = _initialDeviation,
+                RatingMean = _rating.InitialMean,
+                    RatingDeviation = _rating.InitialDeviation,
                     Division = Division.Bronze,
                     Level = 0,
                     DecayDays = 0

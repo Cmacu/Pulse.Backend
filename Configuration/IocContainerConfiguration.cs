@@ -21,6 +21,8 @@ namespace Pulse.Configuration {
     /// <param name="env">Access to the Environment object, if needed.</param>
     public static void ConfigureService(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env) {
       services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+      services.AddSingleton<MatchmakerPoolSingleton>();
+      services.AddSingleton<ApiConfiguration>();
 
       services.AddScoped<AuthService>();
       services.AddScoped<NotificationService>();
@@ -28,7 +30,6 @@ namespace Pulse.Configuration {
       services.AddScoped<PlayerService>();
       services.AddScoped<PlayerSettingService>();
 
-      services.AddSingleton<MatchmakerPoolSingleton>();
       services.AddScoped<MatchService>();
       services.AddScoped<MatchmakerService>();
       services.AddScoped<MatchmakerLogService>();

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Pulse.Configuration;
 using Pulse.Matchmaker.Services;
 using Pulse.Rank.Entities;
@@ -11,7 +10,7 @@ using Pulse.Rank.Models;
 
 namespace Pulse.Rank.Services {
     public class LeaderboardService {
-        private readonly IConfiguration _configuration;
+        private readonly ApiConfiguration _configuration;
         private readonly DataContext _context;
         private readonly MatchService _matchService;
         private readonly RatingService _ratingService;
@@ -21,7 +20,7 @@ namespace Pulse.Rank.Services {
         private readonly DateTime _seasonStart;
 
         public LeaderboardService(
-            IConfiguration configuration,
+            ApiConfiguration configuration,
             DataContext context,
             MatchService matchService,
             RatingService ratingService,
@@ -34,8 +33,8 @@ namespace Pulse.Rank.Services {
             _ratingService = ratingService;
             _decayService = decayService;
             _cache = cache;
-            _leaderboardKey = _configuration.GetValue<string>("Leaderboard:CacheKey");
-            _seasonStart = _configuration.GetValue<DateTime>("Leaderboard:SeasonStart");
+            _leaderboardKey = _configuration.Leaderboard.CacheKey;
+            _seasonStart = _configuration.Leaderboard.SeasonStart;
         }
 
         public List<LeaderboardLog> GetLog(string username) {

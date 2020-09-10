@@ -6,7 +6,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Pulse.Configuration;
 using Pulse.Core.Entities;
@@ -16,25 +15,24 @@ using Pulse.Exceptions;
 namespace Pulse.Core.Services {
     public class AuthService {
         private readonly DataContext _context;
-        private readonly IConfiguration _configuration;
-        // private readonly RatingService _ratingService;
+        private readonly ApiConfiguration _configuration;
         private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler;
         private readonly EmailService _emailService;
         private readonly int _expirySeconds;
         private readonly byte[] _key;
-        public AuthService(DataContext context, IConfiguration configuration, EmailService emailService) {
+        public AuthService(DataContext context, ApiConfiguration configuration, EmailService emailService) {
             _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
 
-            _expirySeconds = int.Parse(_configuration["Server:TokenExpirySeconds"]);
-            _key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            _expirySeconds = _configuration.Auth.TokenExpirySeconds;
+            _key = Encoding.ASCII.GetBytes(_configuration.Auth.JwtKey);
         }
 
         public void SendAccessCode(string email) {
             if (!IsValidEmail(email))
-                throw new PulseUnauthorizedException("Invalid email: " + email);
+                throw new PulseUnauthorizedException(string.Format(_configuration.Auth.EmailError, email));
 
             var player = GetPlayer(email);
             if (player == null) {
@@ -50,11 +48,11 @@ namespace Pulse.Core.Services {
 
         public AuthModel Login(string email, string accessCode, string ipAddress, string browser) {
             var player = GetPlayer(email);
-            if (player == null) throw new PulseUnauthorizedException("Email not found!");
+            if (player == null) throw new PulseUnauthorizedException(string.Format(_configuration.Auth.EmailError, email));
             if (player.AccessCode != accessCode) {
                 player.RequestCount++;
                 _context.SaveChanges();
-                throw new PulseUnauthorizedException("Invalid access code!");
+                throw new PulseUnauthorizedException(_configuration.Auth.AccessCodeError);
             }
 
             var claims = new List<Claim>() {
@@ -95,10 +93,10 @@ namespace Pulse.Core.Services {
 
             if (!(securityToken is JwtSecurityToken jwtSecurityToken) ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
-            ) throw new SecurityTokenException("Invalid access token");
+            ) throw new SecurityTokenException(_configuration.Auth.AccessTokenError);
 
             var email = principal.FindFirst(ClaimTypes.Email).Value;
-            var refreshTokenExpirationDays = _configuration.GetValue<int>("Server:RefreshTokenExpirationDays");
+            var refreshTokenExpirationDays = _configuration.Auth.RefreshTokenExpirationDays;
             var session = _context.PlayerSession
                 .FirstOrDefault(x =>
                     x.RefreshToken == refreshToken &&
@@ -108,7 +106,7 @@ namespace Pulse.Core.Services {
                 );
 
             if (session == null)
-                throw new SecurityTokenException("Invalid refresh token");
+                throw new SecurityTokenException(_configuration.Auth.RefreshTokenError);
 
             var authModel = new AuthModel {
                 AccessToken = GenerateToken(principal.Claims),
@@ -123,7 +121,7 @@ namespace Pulse.Core.Services {
         }
 
         private string GenerateToken(IEnumerable<Claim> claims) {
-            var expirySeconds = int.Parse(_configuration["Server:TokenExpirySeconds"]);
+            var expirySeconds = _configuration.Auth.TokenExpirySeconds;
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddSeconds(expirySeconds),
@@ -140,7 +138,7 @@ namespace Pulse.Core.Services {
 
             try {
                 // Normalize the domain
-                email = Regex.Replace(email, @"(@)(.+)$", DomainMapper,
+                email = Regex.Replace(email, _configuration.Auth.DomainRegEx, DomainMapper,
                     RegexOptions.None, TimeSpan.FromMilliseconds(200));
 
                 // Examines the domain part of the email and normalizes it.
@@ -154,17 +152,15 @@ namespace Pulse.Core.Services {
                     return match.Groups[1].Value + domainName;
                 }
             } catch (RegexMatchTimeoutException e) {
-                Console.WriteLine("Invalid email: " + e.Message);
+                Console.WriteLine(string.Format(_configuration.Auth.EmailError, e.Message));
                 return false;
             } catch (ArgumentException e) {
-                Console.WriteLine("Invalid email: " + e.Message);
+                Console.WriteLine(string.Format(_configuration.Auth.EmailError, e.Message));
                 return false;
             }
 
             try {
-                return Regex.IsMatch(email,
-                    @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
-                    @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$",
+                return Regex.IsMatch(email, _configuration.Auth.EmailRegEx,
                     RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
             } catch (RegexMatchTimeoutException) {
                 return false;
@@ -175,9 +171,9 @@ namespace Pulse.Core.Services {
             var player = _context.Player.FirstOrDefault(x => x.Email == email);
             if (player == null) return player;
             if (player.IsBlockedUntil != null && player.IsBlockedUntil < DateTime.UtcNow)
-                throw new PulseUnauthorizedException($"Account is blocked until { player.IsBlockedUntil }. Contact admin for more details.");
-            if (player.RequestCount > 5)
-                throw new PulseUnauthorizedException($"Too many access attempts. Accout is blocked. Contact admin to restore access.");
+                throw new PulseUnauthorizedException(string.Format(_configuration.Auth.BlockedError, player.IsBlockedUntil));
+            if (player.RequestCount > _configuration.Auth.MaxRequestCount)
+                throw new PulseUnauthorizedException(_configuration.Auth.RequestCountError);
             return player;
         }
     }

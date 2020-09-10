@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
+using Pulse.Configuration;
 
 namespace Pulse.Rank.Services {
     public class DecayService {
-        private readonly IConfiguration _configuration;
+        private readonly ApiConfiguration _configuration;
         private readonly int _decayStepsCount;
-        private readonly List<int> _decayAmounts;
+        private readonly int[] _decayAmounts;
         private readonly DateTime _decayStartAt;
         private readonly DateTime _decayEndAt;
 
-        public DecayService(IConfiguration configuration) {
+        public DecayService(ApiConfiguration configuration) {
             _configuration = configuration;
 
-            _decayStepsCount = _configuration.GetValue<int>("Decay:TotalSteps");
-            _decayStartAt = _configuration.GetValue<DateTime>("Decay:StartAt");
-            _decayEndAt = _configuration.GetValue<DateTime>("Decay:EndAt");
-            _decayAmounts = _configuration.GetValue<string>("Decay:StepAmounts").Split(',').Select(int.Parse).ToList();
+            _decayStepsCount = _configuration.Decay.TotalSteps;
+            _decayStartAt = _configuration.Decay.StartAt;
+            _decayEndAt = _configuration.Decay.EndAt;
+            _decayAmounts = _configuration.Decay.StepAmounts;
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Pulse.Rank.Services {
         /// <param name="decayStep">The given decay step.</param>
         public int GetDecayValue(int decayStep) {
             if (decayStep <= 0) return 0;
-            if (decayStep > _decayAmounts.Count) return _decayAmounts.Last();
+            if (decayStep > _decayAmounts.Count()) return _decayAmounts.Last();
 
             return _decayAmounts[decayStep - 1];
         }

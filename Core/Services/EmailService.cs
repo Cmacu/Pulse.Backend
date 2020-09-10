@@ -13,23 +13,23 @@ using SendGrid.Helpers.Mail;
 
 namespace Pulse.Core.Services {
     public class EmailService {
-        private readonly IConfiguration _configuration;
+        private readonly ApiConfiguration _configuration;
         private readonly DataContext _context;
         private readonly string _domain;
         private readonly string _fromAddress;
         private readonly string _fromName;
 
-        public EmailService(IConfiguration configuration, DataContext context) {
+        public EmailService(ApiConfiguration configuration, DataContext context) {
             _configuration = configuration;
             _context = context;
-            _domain = _configuration.GetValue<string>("Server:Domain");
-            _fromAddress = _configuration.GetValue<string>("Email:FromAddress");
-            _fromName = _configuration.GetValue<string>("Email:FromName");
+            _domain = _configuration.Server.Domain;
+            _fromAddress = _configuration.Email.FromAddress;
+            _fromName = _configuration.Email.FromName;
         }
 
         private List<EmailAddress> _internalAddress {
             get {
-                return (_configuration.GetValue<string>("Email:InternalAddress") ?? "")
+                return (_configuration.Email.InternalAddress ?? "")
                     .Split(';')
                     .Select(x => new EmailAddress(x))
                     .ToList();
@@ -51,13 +51,13 @@ namespace Pulse.Core.Services {
         }
 
         public async void SendAuthorizationLink(Player player) {
-            var link = $"{_domain}/auth/login?email={player.Email}&accessCode={player.AccessCode}";
+            var link = $"{_configuration.Server.Domain}/auth/login?email={player.Email}&accessCode={player.AccessCode}";
             var subject = "Pulse Authorization Request";
             var message = "";
             if (!String.IsNullOrEmpty(player.Username)) message += $"Cheers {player.Username},<br><br>";
             message += $"Pulse Access Code: {player.AccessCode}<br><br>";
             message += $"Or click here: <a href='{link}'>{link}</a><br><br>";
-            message += $"You are receiving this message because someone requested access via <a href='{_domain}'>{_domain}</a>.<br>";
+            message += $"You are receiving this message because someone requested access via <a href='{_configuration.Server.Domain}'>{_configuration.Server.Domain}</a>.<br>";
             await Send(new EmailAddress(player.Email, player.Username), subject, message);
         }
 
@@ -70,7 +70,7 @@ namespace Pulse.Core.Services {
                 <br><br>
                 We found a match for you! Open the official Through The Ages app to play your game. Good luck, and have fun!
                 <br><br>
-                You can disable email notifications from the settings: {_domain}/settings#emailNotifications
+                You can disable email notifications from the settings: {_configuration.Server.Domain}/settings#emailNotifications
             ";
             await this.Send(new EmailAddress(player.Email, player.Username), subject, body);
         }
@@ -95,7 +95,7 @@ namespace Pulse.Core.Services {
             _context.EmailLog.Add(log);
             _context.SaveChangesAsync();
 
-            var apiKey = _configuration.GetValue<string>("Email:ApiKey");
+            var apiKey = _configuration.Email.ApiKey;
             var client = new SendGridClient(apiKey);
             var from = new EmailAddress(_fromAddress, _fromName);
             var plainTextBody = body.Replace("<br>", Environment.NewLine);
