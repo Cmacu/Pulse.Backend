@@ -7,13 +7,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Pulse.Backend
-{
-    public class Program
-    {
+namespace Pulse {
+    public class Program {
         private static IConfigurationRoot _configuration;
-        public static void Main(string[] args)
-        {
+        public static void Main(string[] args) {
             _configuration = new ConfigurationBuilder()
                 .AddCommandLine(args)
                 .AddJsonFile("appsettings.json", optional : true)
@@ -24,17 +21,14 @@ namespace Pulse.Backend
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-            .ConfigureLogging((hostingContext, logging) =>
-            {
+            .ConfigureLogging((hostingContext, logging) => {
                 logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
                 logging.AddConsole();
                 logging.AddDebug();
                 logging.AddEventSourceLogger();
             })
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development")
-                {
+            .ConfigureWebHostDefaults(webBuilder => {
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") != "Development") {
                     webBuilder.UseUrls(_configuration["hosturl"]);
                 }
                 webBuilder.UseStartup<Startup>();

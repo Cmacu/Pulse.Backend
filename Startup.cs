@@ -9,9 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Pulse.Configuration;
+using Pulse.Backend;
+using Pulse.Core.Authorization;
 
-namespace Pulse.Backend {
+namespace Pulse {
     public class Startup {
         public IConfiguration _configuration { get; }
         private IWebHostEnvironment _env { get; set; }
@@ -22,11 +23,12 @@ namespace Pulse.Backend {
         public Startup(IConfiguration configuration, IWebHostEnvironment env) {
             _configuration = configuration;
             _env = env;
-            var apiConfiguration = new ApiConfiguration(configuration);
-            _corsOrigins = apiConfiguration.Server.AllowedHosts;
-            _corsPolicyName = apiConfiguration.Server.CorsPolicyName;
-            _matchmakerHubPath = apiConfiguration.Server.MatchmakerHubPath;
-            _jwtKey = Encoding.ASCII.GetBytes(apiConfiguration.Auth.JwtKey);
+            var appConfig = new AppConfig(configuration);
+            _corsOrigins = appConfig.AllowedHosts;
+            _corsPolicyName = appConfig.CorsPolicyName;
+            _matchmakerHubPath = appConfig.MatchmakerHubPath;
+            var authConfig = new AuthConfig(configuration);
+            _jwtKey = Encoding.ASCII.GetBytes(authConfig.JwtKey);
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
