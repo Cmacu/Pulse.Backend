@@ -34,7 +34,7 @@ namespace Pulse.Core.Authorization {
 
         public void SendAccessCode(string email) {
             if (!IsValidEmail(email))
-                throw new PulseUnauthorizedException(string.Format(_authConfig.EmailError, email));
+                throw new AuthException(string.Format(_authConfig.EmailError, email));
 
             var player = GetPlayer(email);
             if (player == null) {
@@ -49,14 +49,14 @@ namespace Pulse.Core.Authorization {
         }
 
         public AuthModel Login(string email, string accessCode, string ipAddress, string browser) {
-            if (string.IsNullOrEmpty(email)) throw new PulseUnauthorizedException(string.Format(_authConfig.EmailError, email));
-            if (string.IsNullOrEmpty(accessCode)) throw new PulseUnauthorizedException(_authConfig.AccessCodeError);
+            if (string.IsNullOrEmpty(email)) throw new AuthException(string.Format(_authConfig.EmailError, email));
+            if (string.IsNullOrEmpty(accessCode)) throw new AuthException(_authConfig.AccessCodeError);
             var player = GetPlayer(email);
-            if (player == null) throw new PulseUnauthorizedException(string.Format(_authConfig.EmailError, email));
+            if (player == null) throw new AuthException(string.Format(_authConfig.EmailError, email));
             if (player.AccessCode != accessCode) {
                 player.RequestCount++;
                 _context.SaveChanges();
-                throw new PulseUnauthorizedException(_authConfig.AccessCodeError);
+                throw new AuthException(_authConfig.AccessCodeError);
             }
 
             var claims = new List<Claim>() {
@@ -175,9 +175,9 @@ namespace Pulse.Core.Authorization {
             var player = _context.Players.FirstOrDefault(x => x.Email == email);
             if (player == null) return player;
             if (player.IsBlockedUntil != null && player.IsBlockedUntil < DateTime.UtcNow)
-                throw new PulseUnauthorizedException(string.Format(_authConfig.BlockedError, player.IsBlockedUntil));
+                throw new AuthException(string.Format(_authConfig.BlockedError, player.IsBlockedUntil));
             if (player.RequestCount > _authConfig.MaxRequestCount)
-                throw new PulseUnauthorizedException(_authConfig.RequestCountError);
+                throw new AuthException(_authConfig.RequestCountError);
             return player;
         }
     }
