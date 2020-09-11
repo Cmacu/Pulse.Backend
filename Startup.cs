@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -11,6 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Pulse.Backend;
 using Pulse.Core.Authorization;
+using Pulse.Matchmaker.Matcher;
 
 namespace Pulse {
     public class Startup {
@@ -58,7 +58,7 @@ namespace Pulse {
 
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();
-                // endpoints.MapHub<MatchHub>(_matchmakerHubPath);
+                endpoints.MapHub<MatchmakerHub>(_matchmakerHubPath);
             });
         }
 
