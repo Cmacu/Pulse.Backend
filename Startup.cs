@@ -55,6 +55,7 @@ namespace Pulse {
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseExceptionHandler("/error");
 
             app.UseEndpoints(endpoints => {
                 endpoints.MapControllers();

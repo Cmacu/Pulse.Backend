@@ -33,8 +33,9 @@ namespace Pulse.Core.AppErrors {
 
             _appErrorService.Add(ex);
 
-            if (ex is AuthException) {
-                Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+            if (ex is AppException) {
+                var appException = (AppException) ex;
+                Response.StatusCode = (int) appException.StatusCode;
                 return ex.Message;
             } else {
                 Response.StatusCode = (int) HttpStatusCode.InternalServerError;
