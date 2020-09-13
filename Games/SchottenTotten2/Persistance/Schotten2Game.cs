@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Pulse.Games.SchottenTotten2.Gameplay;
 
 namespace Pulse.Games.SchottenTotten2.Persistance {
@@ -10,6 +11,7 @@ namespace Pulse.Games.SchottenTotten2.Persistance {
     public GameState State { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public DateTime DeletedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public List<Schotten2Log> Logs { get; set; } = new List<Schotten2Log>();
   }
 }

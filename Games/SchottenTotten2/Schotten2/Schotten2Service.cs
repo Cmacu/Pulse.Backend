@@ -10,10 +10,10 @@ using Pulse.Games.SchottenTotten2.Wall;
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
   public class Schotten2Service {
     private GameEngine _engine;
-    private Schotten2GameService _storage;
+    private Schotten2GameService _persistance;
     public Schotten2Service(GameEngine gameplay, Schotten2GameService storage) {
       _engine = gameplay;
-      _storage = storage;
+      _persistance = storage;
     }
 
     public Schotten2Response CreateGame(string player, string opponent) {
@@ -21,13 +21,14 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var state = _engine.CreateGame();
       // var r = new Random();
       // return this.OrderBy(x => r.Next()).Select(int.Parse).ToList();
-      _storage.CreateSchotten2Game(player, opponent, state);
+      var gameId = _persistance.CreateSchotten2Game(player, opponent, state);
+      _persistance.SaveLog(gameId, player, "Create", state);
 
       return MapState(state, true);
     }
 
     public Schotten2Response GetGame(string player, int gameId) {
-      var game = _storage.GetSchotten2Game(gameId);
+      var game = _persistance.GetSchotten2Game(gameId);
       if (game == null) {
         throw new NotFoundException($"Game {gameId} not found");
       }

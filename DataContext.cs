@@ -35,9 +35,18 @@ namespace Pulse.Backend {
         public DbSet<PlayerSetting> PlayerSettings { get; set; }
         public DbSet<LeaderboardLog> LeaderboardLogs { get; set; }
         public DbSet<Schotten2Game> Schotten2Games { get; set; }
+        public DbSet<Schotten2Log> Schotten2Logs { get; set; }
 
         public class Schotten2GamesConfiguration : IEntityTypeConfiguration<Schotten2Game> {
             public void Configure(EntityTypeBuilder<Schotten2Game> builder) {
+                // This Converter will perform the conversion to and from Json to the desired type
+                builder.Property(e => e.State).HasConversion(
+                    v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+                    v => JsonConvert.DeserializeObject<GameState>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            }
+        }
+        public class Schotten2LogsConfiguration : IEntityTypeConfiguration<Schotten2Log> {
+            public void Configure(EntityTypeBuilder<Schotten2Log> builder) {
                 // This Converter will perform the conversion to and from Json to the desired type
                 builder.Property(e => e.State).HasConversion(
                     v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
@@ -56,6 +65,7 @@ namespace Pulse.Backend {
             }
 
             modelBuilder.ApplyConfiguration(new Schotten2GamesConfiguration());
+            modelBuilder.ApplyConfiguration(new Schotten2LogsConfiguration());
 
             // Add unique indexes to avoid duplicate dates
             modelBuilder.Entity<Player>().HasIndex(x => x.Email).IsUnique();
