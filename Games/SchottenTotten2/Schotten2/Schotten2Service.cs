@@ -1,7 +1,8 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
-using AutoMapper;
+using System.Security.Claims;
 using Pulse.Core.AppErrors;
+using Pulse.Core.Authorization;
 using Pulse.Games.SchottenTotten2.Gameplay;
 using Pulse.Games.SchottenTotten2.Persistance;
 using Pulse.Games.SchottenTotten2.Wall;
@@ -14,7 +15,9 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       _engine = gameplay;
       _storage = storage;
     }
+
     public Schotten2Response CreateGame(string player, string opponent) {
+      if (string.IsNullOrEmpty(player)) throw new AuthException("Active session required to play Schotten 2");
       var state = _engine.CreateGame();
       // var r = new Random();
       // return this.OrderBy(x => r.Next()).Select(int.Parse).ToList();
@@ -23,7 +26,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       return MapState(state, true);
     }
 
-    public Schotten2Response GetGame(int gameId, string player) {
+    public Schotten2Response GetGame(string player, int gameId) {
       var game = _storage.GetSchotten2Game(gameId);
       if (game == null) {
         throw new NotFoundException($"Game {gameId} not found");

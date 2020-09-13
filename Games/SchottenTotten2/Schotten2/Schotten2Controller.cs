@@ -1,7 +1,6 @@
-using System.Collections.Generic;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pulse.Games.SchottenTotten2.Gameplay;
 
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
@@ -10,21 +9,22 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
   [Route("[controller]")]
   public class Schotten2Controller : ControllerBase {
     private Schotten2Service _service;
+    private string _player;
     public Schotten2Controller(Schotten2Service service) {
       _service = service;
+      _player = "1"; //TODO: User.FindFirst(ClaimTypes.NameIdentifier).ToString();
     }
 
     [HttpGet]
     [Route("{gameId}")]
     public ActionResult<Schotten2Response> GetGame(int gameId) {
-      var player = "1";
-      return _service.GetGame(gameId, player);
+      return _service.GetGame(_player, gameId);
     }
 
     [HttpGet]
     [Route("create")]
-    public ActionResult<Schotten2Response> CreateGame(string player, string opponent) {
-      return _service.CreateGame(player, opponent);
+    public ActionResult<Schotten2Response> CreateGame(string opponent) {
+      return _service.CreateGame(_player, opponent);
     }
 
     [HttpPost]
