@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -35,10 +36,16 @@ namespace Pulse {
         public void ConfigureServices(IServiceCollection services) {
             ConfigureSecurity(services);
             IocContainerConfiguration.ConfigureService(services, _configuration, _env);
+            services.AddHsts(options => {
+                options.Preload = true;
+                options.IncludeSubDomains = true;
+                options.MaxAge = TimeSpan.FromDays(60);
+            });
             services.AddAutoMapper(typeof(Startup));
             services.AddMemoryCache();
             services.AddControllers();
             services.AddSignalR();
+            // services.AddRouting();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
