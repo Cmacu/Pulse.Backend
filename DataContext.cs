@@ -1,10 +1,15 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json;
 using Pulse.Core.AppErrors;
 using Pulse.Core.Authorization;
 using Pulse.Core.Notifications;
 using Pulse.Core.Players;
 using Pulse.Core.PlayerSettings;
+using Pulse.Games.SchottenTotten2.Gameplay;
+using Pulse.Games.SchottenTotten2.Persistance;
 using Pulse.Matchmaker.Logs;
 using Pulse.Matchmaker.Matches;
 using Pulse.Ranking.Leaderboard;
@@ -29,6 +34,16 @@ namespace Pulse.Backend {
         public DbSet<Session> Sessions { get; set; }
         public DbSet<PlayerSetting> PlayerSettings { get; set; }
         public DbSet<LeaderboardLog> LeaderboardLogs { get; set; }
+        public DbSet<Schotten2Game> Schotten2Games { get; set; }
+
+        public class Schotten2GamesConfiguration : IEntityTypeConfiguration<Schotten2Game> {
+            public void Configure(EntityTypeBuilder<Schotten2Game> builder) {
+                // This Converter will perform the conversion to and from Json to the desired type
+                builder.Property(e => e.State).HasConversion(
+                    v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+                    v => JsonConvert.DeserializeObject<GameState>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder) {
             // Set max length to 256 by default so string can be created as varchar
@@ -39,6 +54,8 @@ namespace Pulse.Backend {
             foreach (var property in stringProperties) {
                 if (property.GetMaxLength() == null) property.SetMaxLength(256);
             }
+
+            modelBuilder.ApplyConfiguration(new Schotten2GamesConfiguration());
 
             // Add unique indexes to avoid duplicate dates
             modelBuilder.Entity<Player>().HasIndex(x => x.Email).IsUnique();
