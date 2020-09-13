@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Pulse.Backend;
+using Pulse.Core.AppErrors;
 using Pulse.Games.SchottenTotten2.Gameplay;
 
 namespace Pulse.Games.SchottenTotten2.Persistance {
@@ -12,9 +13,12 @@ namespace Pulse.Games.SchottenTotten2.Persistance {
       _context = context;
     }
 
-    public Schotten2Game GetSchotten2Game(int gameId) {
-      var game = _context.Schotten2Games.FirstOrDefault(x => x.Id == gameId);
-      // TODO: Handle not found exception
+    public Schotten2Game GetSchotten2Game(string player) {
+      var game = _context.Schotten2Games
+        .Where(x => x.Attacker == player || x.Defender == player)
+        .OrderByDescending(x => x.UpdatedAt)
+        .FirstOrDefault();
+      if (game == null) throw new NotFoundException($"Game not found");
       return game;
     }
 
@@ -35,14 +39,12 @@ namespace Pulse.Games.SchottenTotten2.Persistance {
       return game.Id;
     }
 
-    public void UpdateSchotten2Game(int gameId, GameState state) {
-      var game = GetSchotten2Game(gameId);
-      game.State = state;
+    public void UpdateSchotten2Game(Schotten2Game game) {
       game.UpdatedAt = DateTime.UtcNow;
       _context.SaveChangesAsync();
     }
 
-    public Task SaveLog(int gameId, string player, string action, GameState state, int? sectionIndex = null, int? handIndex = null) {
+    public Task SaveLog(int gameId, GameState state, string player, string action, int? sectionIndex = null, int? handIndex = null) {
       var log = new Schotten2Log() {
       GameId = gameId,
       Player = player,
