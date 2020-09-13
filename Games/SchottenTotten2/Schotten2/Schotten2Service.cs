@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using Pulse.Core.AppErrors;
-using Pulse.Core.Authorization;
+using Pulse.Games.SchottenTotten2.Cards;
 using Pulse.Games.SchottenTotten2.Gameplay;
 using Pulse.Games.SchottenTotten2.Persistance;
 using Pulse.Games.SchottenTotten2.Wall;
@@ -17,23 +17,34 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     }
 
     public Schotten2Response CreateGame(string player, string opponent) {
-      if (string.IsNullOrEmpty(player)) throw new AuthException("Active session required to play Schotten 2");
       var state = _engine.CreateGame();
       // var r = new Random();
       // return this.OrderBy(x => r.Next()).Select(int.Parse).ToList();
       var gameId = _persistance.CreateSchotten2Game(player, opponent, state);
-      _persistance.SaveLog(gameId, player, "Create", state);
+      _persistance.SaveLog(gameId, state, player, "Create");
 
       return MapState(state, true);
     }
 
-    public Schotten2Response GetGame(string player, int gameId) {
-      var game = _persistance.GetSchotten2Game(gameId);
-      if (game == null) {
-        throw new NotFoundException($"Game {gameId} not found");
-      }
+    public Schotten2Response GetGame(string player) {
+      var game = _persistance.GetSchotten2Game(player);
       var state = game.State;
       return MapState(state, player == game.Attacker);
+    }
+
+    public Schotten2Response Retreat(string player, int sectionIndex) {
+      // Retrieve Game
+      var game = _persistance.GetSchotten2Game(player);
+      // Validate input
+      if (player != game.Attacker) throw new ForbiddenException("Defender can not retreat");
+      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException($"Invalid Wall Section: {sectionIndex}");
+      // Perform action
+      game.State = _engine.Retreat(game.State, sectionIndex);
+      // Update state
+      _persistance.UpdateSchotten2Game(game);
+      // Add Log
+      _persistance.SaveLog(game.Id, game.State, player, "Retreat", sectionIndex);
+      return MapState(game.State, true);
     }
 
     public Schotten2Response MapState(GameState state, bool isAttacker) {

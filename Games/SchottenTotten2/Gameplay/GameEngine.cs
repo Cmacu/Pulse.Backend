@@ -36,6 +36,13 @@ namespace Pulse.Games.SchottenTotten2.Gameplay {
       return state;
     }
 
+    public GameState Retreat(GameState state, int sectionIndex) {
+      var cards = state.Sections[sectionIndex].attackFormation;
+      state.DiscardCards.AddRange(cards);
+      state.Sections[sectionIndex].attackFormation = new List<Card>();
+      return state;
+    }
+
     private List<Section> CreateSections(GameConfig gameConfig) {
       var leftPit = gameConfig.GetSection("Pit");
       var leftTower = gameConfig.GetSection("Tower");
