@@ -141,6 +141,26 @@ namespace Pulse.Backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Schotten2Games",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    MatchId = table.Column<string>(maxLength: 256, nullable: true),
+                    AttackerId = table.Column<string>(maxLength: 256, nullable: true),
+                    DefenderId = table.Column<string>(maxLength: 256, nullable: true),
+                    WinnerId = table.Column<string>(maxLength: 256, nullable: true),
+                    State = table.Column<string>(nullable: true),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    UpdatedAt = table.Column<DateTime>(nullable: false),
+                    DeletedAt = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schotten2Games", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LeaderboardLogs",
                 columns: table => new
                 {
@@ -272,6 +292,55 @@ namespace Pulse.Backend.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Schotten2Logs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    MatchId = table.Column<string>(maxLength: 256, nullable: true),
+                    PlayerId = table.Column<string>(maxLength: 256, nullable: true),
+                    Action = table.Column<string>(maxLength: 256, nullable: true),
+                    HandIndex = table.Column<int>(nullable: true),
+                    SectionIndex = table.Column<int>(nullable: true),
+                    State = table.Column<string>(nullable: true),
+                    Timestamp = table.Column<DateTime>(nullable: false),
+                    Schotten2GameId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schotten2Logs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Schotten2Logs_Schotten2Games_Schotten2GameId",
+                        column: x => x.Schotten2GameId,
+                        principalTable: "Schotten2Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Schotten2Players",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    MatchId = table.Column<string>(maxLength: 256, nullable: true),
+                    PlayerId = table.Column<string>(maxLength: 256, nullable: true),
+                    Role = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<DateTime>(nullable: false),
+                    Schotten2GameId = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Schotten2Players", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Schotten2Players_Schotten2Games_Schotten2GameId",
+                        column: x => x.Schotten2GameId,
+                        principalTable: "Schotten2Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_LeaderboardLogs_CreatedAt",
                 table: "LeaderboardLogs",
@@ -327,6 +396,32 @@ namespace Pulse.Backend.Migrations
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Schotten2Games_MatchId",
+                table: "Schotten2Games",
+                column: "MatchId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schotten2Logs_MatchId",
+                table: "Schotten2Logs",
+                column: "MatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schotten2Logs_Schotten2GameId",
+                table: "Schotten2Logs",
+                column: "Schotten2GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schotten2Players_MatchId",
+                table: "Schotten2Players",
+                column: "MatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schotten2Players_Schotten2GameId",
+                table: "Schotten2Players",
+                column: "Schotten2GameId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Sessions_PlayerId",
                 table: "Sessions",
                 column: "PlayerId");
@@ -362,10 +457,19 @@ namespace Pulse.Backend.Migrations
                 name: "PlayerSettings");
 
             migrationBuilder.DropTable(
+                name: "Schotten2Logs");
+
+            migrationBuilder.DropTable(
+                name: "Schotten2Players");
+
+            migrationBuilder.DropTable(
                 name: "Sessions");
 
             migrationBuilder.DropTable(
                 name: "Matches");
+
+            migrationBuilder.DropTable(
+                name: "Schotten2Games");
 
             migrationBuilder.DropTable(
                 name: "Players");

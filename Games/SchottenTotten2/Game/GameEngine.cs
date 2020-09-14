@@ -3,7 +3,7 @@ using Pulse.Backend;
 using Pulse.Games.SchottenTotten2.Cards;
 using Pulse.Games.SchottenTotten2.Wall;
 
-namespace Pulse.Games.SchottenTotten2.Gameplay {
+namespace Pulse.Games.SchottenTotten2.Game {
   public class GameEngine {
     private readonly DataContext _context;
     private readonly CardService _cardService;

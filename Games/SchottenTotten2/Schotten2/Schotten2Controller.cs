@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pulse.Core.AppErrors;
 
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
@@ -9,29 +10,30 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
   [Route("[controller]")]
   public class Schotten2Controller : ControllerBase {
     private Schotten2Service _service;
-    private string _player;
+    private string _playerId;
     public Schotten2Controller(Schotten2Service service) {
       _service = service;
-      _player = "Cmacu"; //TODO: User.FindFirst(ClaimTypes.NameIdentifier).ToString();
+      _playerId = "Cmacu"; //TODO: int.Parse(User.FindFirst(ClaimTypes.NameIdentifier));
       // if (string.IsNullOrEmpty(player)) throw new AuthException("Active session required to play Schotten 2");
     }
 
     [HttpGet]
-    [Route("{gameId}")]
-    public ActionResult<Schotten2Response> GetGame(int gameId) {
-      return _service.GetGame(_player);
+    [Route("")]
+    public ActionResult<Schotten2Response> Load() {
+      return _service.Load(_playerId);
     }
 
     [HttpGet]
-    [Route("create")]
-    public ActionResult<Schotten2Response> CreateGame(string opponent) {
-      return _service.CreateGame(_player, opponent);
+    [Route("start")]
+    public ActionResult<Schotten2Response> Start(string opponentId) {
+      if (string.IsNullOrEmpty(opponentId)) throw new ForbiddenException("OpponentId is required!");
+      return _service.Start(_playerId, opponentId, "Test");
     }
 
     [HttpGet]
     [Route("retreat")]
     public ActionResult<Schotten2Response> Retreat(int sectionIndex) {
-      return _service.Retreat(_player, sectionIndex);
+      return _service.Retreat(_playerId, sectionIndex);
     }
 
     [HttpPost]

@@ -193,25 +193,29 @@ namespace Pulse.Backend.Migrations
                     b.ToTable("Players");
                 });
 
-            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Persistance.Schotten2Game", b =>
+            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Game", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("Attacker")
+                    b.Property<string>("AttackerId")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Defender")
+                    b.Property<string>("DefenderId")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("MatchId")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
 
                     b.Property<string>("State")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -219,16 +223,19 @@ namespace Pulse.Backend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Winner")
+                    b.Property<string>("WinnerId")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MatchId")
+                        .IsUnique();
+
                     b.ToTable("Schotten2Games");
                 });
 
-            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Persistance.Schotten2Log", b =>
+            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Log", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -238,15 +245,19 @@ namespace Pulse.Backend.Migrations
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
-                    b.Property<int>("GameId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("HandIndex")
                         .HasColumnType("int");
 
-                    b.Property<string>("Player")
+                    b.Property<string>("MatchId")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
+
+                    b.Property<string>("PlayerId")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
+
+                    b.Property<int?>("Schotten2GameId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("SectionIndex")
                         .HasColumnType("int");
@@ -259,9 +270,43 @@ namespace Pulse.Backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameId");
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("Schotten2GameId");
 
                     b.ToTable("Schotten2Logs");
+                });
+
+            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("MatchId")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("PlayerId")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Schotten2GameId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("Schotten2GameId");
+
+                    b.ToTable("Schotten2Players");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Logs.MatchmakerLog", b =>
@@ -533,13 +578,18 @@ namespace Pulse.Backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Persistance.Schotten2Log", b =>
+            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Log", b =>
                 {
-                    b.HasOne("Pulse.Games.SchottenTotten2.Persistance.Schotten2Game", "Game")
-                        .WithMany("Logs")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Pulse.Games.SchottenTotten2.Storage.Schotten2Game", null)
+                        .WithMany("Schotten2Logs")
+                        .HasForeignKey("Schotten2GameId");
+                });
+
+            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Player", b =>
+                {
+                    b.HasOne("Pulse.Games.SchottenTotten2.Storage.Schotten2Game", null)
+                        .WithMany("Schotten2Players")
+                        .HasForeignKey("Schotten2GameId");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Matches.MatchPlayer", b =>

@@ -4,7 +4,8 @@ using Pulse.Games.SchottenTotten2.Wall;
 
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
   public class Schotten2Response {
-    public bool isMyTurn { get; set; }
+    public bool isAttacker { get; set; }
+    public bool isAttackerTurn { get; set; }
     public int OilCount { get; set; }
     public List<SectionModel> Sections { get; set; }
     public List<Card> MyCards { get; set; }

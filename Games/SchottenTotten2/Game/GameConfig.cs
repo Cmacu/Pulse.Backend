@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Pulse.Games.SchottenTotten2.Wall;
 
-namespace Pulse.Games.SchottenTotten2.Gameplay {
+namespace Pulse.Games.SchottenTotten2.Game {
   public class GameConfig {
     public readonly int SuitCount = 5;
     public readonly int RankCount = 12;

@@ -8,10 +8,9 @@ using Pulse.Core.Authorization;
 using Pulse.Core.Notifications;
 using Pulse.Core.Players;
 using Pulse.Core.PlayerSettings;
-using Pulse.Games.SchottenTotten2;
-using Pulse.Games.SchottenTotten2.Gameplay;
-using Pulse.Games.SchottenTotten2.Persistance;
+using Pulse.Games.SchottenTotten2.Game;
 using Pulse.Games.SchottenTotten2.Schotten2;
+using Pulse.Games.SchottenTotten2.Storage;
 using Pulse.Matchmaker.Logs;
 using Pulse.Matchmaker.Matcher;
 using Pulse.Matchmaker.Matches;
@@ -48,23 +47,22 @@ namespace Pulse.Backend {
       services.AddScoped<RatingService>();
       services.AddScoped<DecayService>();
 
+      services.AddSingleton<Schotten2Singleton>();
       services.AddScoped<Schotten2Service>();
+      services.AddScoped<Schotten2Storage>();
       services.AddScoped<GameEngine>();
-      services.AddScoped<Schotten2GameService>();
 
       if (env.IsDevelopment()) {
         services.AddDbContext<DataContext>(options =>
           options.UseMySql(
             configuration.GetConnectionString("DefaultConnection")
-          ),
-          ServiceLifetime.Transient
+          )
         );
       } else {
         services.AddDbContext<DataContext>(options =>
           options.UseSqlServer(
             configuration.GetConnectionString("DefaultConnection")
-          ),
-          ServiceLifetime.Transient
+          )
         );
       }
     }

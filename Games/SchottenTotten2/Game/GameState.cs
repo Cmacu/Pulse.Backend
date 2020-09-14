@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Pulse.Games.SchottenTotten2.Cards;
 using Pulse.Games.SchottenTotten2.Wall;
 
-namespace Pulse.Games.SchottenTotten2.Gameplay {
+namespace Pulse.Games.SchottenTotten2.Game {
   public class GameState {
     public bool IsAttackersTurn { get; set; }
     public int OilCount { get; set; }
