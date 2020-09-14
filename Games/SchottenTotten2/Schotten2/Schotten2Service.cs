@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using Pulse.Core.AppErrors;
 using Pulse.Games.SchottenTotten2.Game;
 using Pulse.Games.SchottenTotten2.Storage;
@@ -13,12 +15,12 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       _storage = storage;
     }
 
-    public Schotten2Response Start(string playerId, string opponentId, string matchId) {
+    public Schotten2Response Start(string attackerId, string defenderId, string matchId) {
       var state = _engine.CreateGame();
       // var r = new Random();
       // return this.OrderBy(x => r.Next()).Select(int.Parse).ToList();
-      _storage.CreateGame(matchId, playerId, opponentId, state);
-      _storage.SaveLog(matchId, state, playerId, "Create");
+      _storage.CreateGame(matchId, attackerId, defenderId, state);
+      _storage.SaveLog(matchId, state, attackerId, "Create");
 
       return MapState(state, true);
     }
@@ -33,14 +35,44 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var game = _storage.LoadGame(playerId);
       // Validate input
       if (playerId != game.AttackerId) throw new ForbiddenException("Only attacker is allowed to retreat");
-      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException($"Invalid Wall Section: {sectionIndex}");
+      if (!game.State.IsAttackersTurn) throw new ForbiddenException("It's defender's turn to play.");
+      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("InvalidInvalid Wall Section.");
       // Perform action
-      game.State = _engine.Retreat(game.State, sectionIndex);
+      var state = _engine.Retreat(game.State, sectionIndex);
       // Update state
-      _storage.UpdateGame(game.MatchId, game.State);
+      _storage.UpdateGame(game.MatchId, state);
       // Add Log
-      _storage.SaveLog(game.MatchId, game.State, playerId, "Retreat", sectionIndex);
-      return MapState(game.State, true);
+      _storage.SaveLog(game.MatchId, state, playerId, "Retreat", sectionIndex);
+      return MapState(state, playerId == game.AttackerId);
+    }
+
+    public Schotten2Response PlayCard(string playerId, int sectionIndex, int handIndex) {
+      var game = _storage.LoadGame(playerId);
+
+      if (game.State.IsAttackersTurn && game.AttackerId != playerId) throw new ForbiddenException("It's attacker's turn to play.");
+      if (!game.State.IsAttackersTurn && game.DefenderId != playerId) throw new ForbiddenException("It's defenders's turn to play.");
+      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("Invalid Wall Section.");
+
+      var state = _engine.PlayCard(game.State, sectionIndex, handIndex);
+
+      _storage.UpdateGame(game.MatchId, state);
+      _storage.SaveLog(game.MatchId, state, playerId, "PlayCard", sectionIndex, handIndex);
+      return MapState(state, playerId == game.AttackerId);
+    }
+
+    public Schotten2Response UseOil(string playerId, int sectionIndex) {
+      var game = _storage.LoadGame(playerId);
+      if (playerId != game.AttackerId) throw new ForbiddenException("Only defender can use oil");
+      if (game.State.OilCount == 0) throw new ForbiddenException("There are no more oil left to use");
+      if (game.State.IsAttackersTurn) throw new ForbiddenException("It's attacker's turn to play.");
+      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("Invalid Wall Section.");
+      if (game.State.Sections[sectionIndex].attackFormation.Count == 0) throw new ForbiddenException("No attacker cards found on this section.");
+
+      var state = _engine.UseOil(game.State, sectionIndex);
+
+      _storage.UpdateGame(game.MatchId, state);
+      _storage.SaveLog(game.MatchId, state, playerId, "UseOil", sectionIndex);
+      return MapState(state, playerId == game.AttackerId);
     }
 
     public Schotten2Response MapState(GameState state, bool isAttacker) {

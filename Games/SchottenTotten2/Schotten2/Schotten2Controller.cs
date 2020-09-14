@@ -38,19 +38,19 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
     [HttpPost]
     [Route("oil")]
-    public ActionResult<Schotten2Response> UseOil(int wallIndex) {
-      return new Schotten2Response();
+    public ActionResult<Schotten2Response> UseOil(int sectionIndex) {
+      return _service.UseOil(_playerId, sectionIndex);
     }
 
     [HttpPost]
     [Route("card")]
-    public ActionResult<Schotten2Response> PlayCard(int handIndex, int wallIndex) {
-      return new Schotten2Response();
+    public ActionResult<Schotten2Response> PlayCard(int sectionIndex, int handIndex) {
+      return _service.PlayCard(_playerId, sectionIndex, handIndex);
     }
 
     [HttpPost]
     [Route("controll")]
-    public ActionResult<Schotten2Response> Controll(int wallIndex) {
+    public ActionResult<Schotten2Response> Controll(int sectionIndex) {
       return new Schotten2Response();
     }
 

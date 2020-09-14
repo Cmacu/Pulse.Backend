@@ -7,6 +7,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
     public readonly int RankCount = 12;
     public readonly int HandSize = 6;
     public readonly int OilCount = 3;
+    public readonly int OilIndex = 0;
 
     public Section GetSection(string name, bool isTopSide = true) {
       var section = new Section() { Name = name, IsDamaged = !isTopSide };
