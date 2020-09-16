@@ -15,18 +15,114 @@ namespace Pulse.Games.SchottenTotten2.Wall {
         _name = value;
       }
     }
-    public int CardSpaces { get; set; }
     public bool IsDamaged { get; set; } = false;
-    public bool IsLower { get; set; } = false;
-    public List<FormationType> Formations { get; set; }
-    public List<Card> attackFormation { get; set; }
-    public List<Card> defendFormation { get; set; }
-    public void Setup(int cardSpaces, List<FormationType> formations, bool isLower) {
-      CardSpaces = cardSpaces;
-      Formations = formations;
-      IsLower = isLower;
-      attackFormation = new List<Card>();
-      defendFormation = new List<Card>();
+    public int Spaces { get; set; }
+    public List<FormationType> Types { get; set; }
+    public List<Card> Attack { get; set; } = new List<Card>();
+    public List<Card> Defense { get; set; } = new List<Card>();
+    public int MaxTries { get; set; } = 0;
+
+    private double _attackStrength = 0;
+    private List<Card> _extraCards = new List<Card>();
+    private int _tryCounter = 0;
+
+    public bool CanDefend(List<Card> extraCards) {
+      if (Attack.Count != Spaces) return true;
+
+      _attackStrength = GetFormationStrength(Attack);
+
+      if (Defense.Count == Spaces)
+        return GetFormationStrength(Defense) >= _attackStrength;
+
+      if (_attackStrength == GetMaxStrength()) return false;
+
+      _extraCards = extraCards;
+      if (Types[0] == FormationType.LOW_SUM) _extraCards.Reverse();
+
+      _tryCounter = 0;
+      var canDefend = GenerateFormations(Defense, 0);
+      if (_tryCounter > MaxTries) MaxTries = _tryCounter;
+
+      return canDefend;
+    }
+
+    private bool GenerateFormations(List<Card> testFormation, int cardIndex) {
+      _tryCounter++;
+      if (testFormation.Count >= Spaces)
+        return GetFormationStrength(testFormation) > _attackStrength;
+
+      for (var i = cardIndex; i < _extraCards.Count; i++) {
+        var newFormation = new List<Card>(testFormation);
+        newFormation.Add(_extraCards[i]);
+        if (GenerateFormations(newFormation, i + 1)) return true;
+      }
+
+      return false;
+    }
+
+    public List<Card> SortFormation(List<Card> cards) {
+      var sorted = new List<Card>();
+      sorted.AddRange(cards);
+      sorted.Sort((x, y) => y.Rank - x.Rank);
+      return sorted;
+    }
+
+    private double GetFormationStrength(List<Card> formation) {
+      var sum = SumFormation(formation) / 100d;
+      formation = SortFormation(formation);
+      foreach (var formationType in Types) {
+        if (formationType == FormationType.SUIT_RUN && CheckFormation(formation, true, false, true)) {
+          return (int) FormationType.SUIT_RUN + sum;
+        }
+        if (formationType == FormationType.SAME_RANK && CheckFormation(formation, false, true, false)) {
+          return (int) FormationType.SAME_RANK + sum;
+        }
+        if (formationType == FormationType.SAME_SUIT && CheckFormation(formation, true, false, false)) {
+          return (int) FormationType.SAME_SUIT + sum;
+        }
+        if (formationType == FormationType.RUN && CheckFormation(formation, false, false, true)) {
+          return (int) FormationType.RUN + sum;
+        }
+        if (formationType == FormationType.LOW_SUM) {
+          return (int) FormationType.LOW_SUM - sum;
+        }
+      }
+      return sum;
+    }
+
+    private bool CheckFormation(List<Card> formation, bool checkSuit, bool checkRank, bool checkRun) {
+      var card = formation[0];
+      for (var i = 1; i < formation.Count; i++) {
+        var next = formation[i];
+        if (checkSuit && card.Suit != next.Suit) return false;
+        if (checkRank && card.Rank != next.Rank) return false;
+        if (checkRun && card.Rank != next.Rank - 1) return false;
+        card = next;
+      }
+      return true;
+    }
+
+    private int SumFormation(List<Card> formation) {
+      var sum = 0;
+      foreach (var card in formation)
+        sum += card.Rank;
+      return sum;
+    }
+
+    private double GetMaxStrength() {
+      var topFormation = Types[0];
+      if (topFormation == FormationType.LOW_SUM) return 0.99;
+      if (topFormation == FormationType.SAME_SUIT)
+        return (int) FormationType.SAME_SUIT + Spaces * 0.11;
+
+      var topRank = 11;
+      var maxStrength = 0d;
+      for (var x = topRank; x > topRank - Spaces; x--)
+        maxStrength += x;
+
+      maxStrength = maxStrength / 100d;
+      maxStrength += (double) topFormation;
+      return maxStrength;
     }
   }
 }

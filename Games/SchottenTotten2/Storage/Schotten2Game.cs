@@ -13,7 +13,5 @@ namespace Pulse.Games.SchottenTotten2.Storage {
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public DateTime? DeletedAt { get; set; }
-    public List<Schotten2Player> Schotten2Players { get; set; } = new List<Schotten2Player>();
-    public List<Schotten2Log> Schotten2Logs { get; set; } = new List<Schotten2Log>();
   }
 }

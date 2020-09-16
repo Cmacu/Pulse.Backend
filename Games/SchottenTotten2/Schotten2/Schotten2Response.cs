@@ -7,8 +7,8 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public bool isAttacker { get; set; }
     public bool isAttackerTurn { get; set; }
     public int OilCount { get; set; }
-    public List<SectionModel> Sections { get; set; }
-    public List<Card> MyCards { get; set; }
+    public List<Section> Sections { get; set; }
+    public List<Card> HandCards { get; set; }
     public int SiegeCardsCount { get; set; }
     public List<Card> DiscardCards { get; set; }
   }

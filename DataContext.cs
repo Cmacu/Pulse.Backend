@@ -35,7 +35,6 @@ namespace Pulse.Backend {
     public DbSet<LeaderboardLog> LeaderboardLogs { get; set; }
 
     public DbSet<Schotten2Game> Schotten2Games { get; set; }
-    public DbSet<Schotten2Player> Schotten2Players { get; set; }
     public DbSet<Schotten2Log> Schotten2Logs { get; set; }
 
     public class Schotten2GameConfiguration : IEntityTypeConfiguration<Schotten2Game> {
@@ -69,7 +68,6 @@ namespace Pulse.Backend {
       // Add unique indexes to avoid duplicate dates
       modelBuilder.Entity<Schotten2Game>().HasIndex(x => x.MatchId).IsUnique();
       modelBuilder.Entity<Schotten2Log>().HasIndex(x => x.MatchId);
-      modelBuilder.Entity<Schotten2Player>().HasIndex(x => x.MatchId);
 
       // Add unique indexes to avoid duplicate dates
       modelBuilder.Entity<Player>().HasIndex(x => x.Email).IsUnique();

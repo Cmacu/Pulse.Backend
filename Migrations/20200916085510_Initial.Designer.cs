@@ -9,7 +9,7 @@ using Pulse.Backend;
 namespace Pulse.Backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200914085215_Initial")]
+    [Migration("20200916085510_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -258,9 +258,6 @@ namespace Pulse.Backend.Migrations
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
-                    b.Property<int?>("Schotten2GameId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("SectionIndex")
                         .HasColumnType("int");
 
@@ -274,41 +271,7 @@ namespace Pulse.Backend.Migrations
 
                     b.HasIndex("MatchId");
 
-                    b.HasIndex("Schotten2GameId");
-
                     b.ToTable("Schotten2Logs");
-                });
-
-            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Player", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("MatchId")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("PlayerId")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Schotten2GameId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MatchId");
-
-                    b.HasIndex("Schotten2GameId");
-
-                    b.ToTable("Schotten2Players");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Logs.MatchmakerLog", b =>
@@ -578,20 +541,6 @@ namespace Pulse.Backend.Migrations
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Log", b =>
-                {
-                    b.HasOne("Pulse.Games.SchottenTotten2.Storage.Schotten2Game", null)
-                        .WithMany("Schotten2Logs")
-                        .HasForeignKey("Schotten2GameId");
-                });
-
-            modelBuilder.Entity("Pulse.Games.SchottenTotten2.Storage.Schotten2Player", b =>
-                {
-                    b.HasOne("Pulse.Games.SchottenTotten2.Storage.Schotten2Game", null)
-                        .WithMany("Schotten2Players")
-                        .HasForeignKey("Schotten2GameId");
                 });
 
             modelBuilder.Entity("Pulse.Matchmaker.Matches.MatchPlayer", b =>

@@ -35,6 +35,5 @@ namespace Pulse.Games.SchottenTotten2.Cards {
 
       return deck;
     }
-
   }
 }
