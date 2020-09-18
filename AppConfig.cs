@@ -7,7 +7,7 @@ namespace Pulse {
     public readonly string CorsPolicyName = "AllowOrigins";
     public readonly string MatchmakerHubPath = "/matchmaker";
     public readonly string[] AllowedHosts = new string[] {
-      "https://localhost:8080",
+      "https://localhost:8888",
       "http://localhost:8000",
       "https://app.pulsegames.io",
     };

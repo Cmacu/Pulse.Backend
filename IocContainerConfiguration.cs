@@ -52,19 +52,11 @@ namespace Pulse.Backend {
       services.AddScoped<Schotten2Storage>();
       services.AddScoped<GameEngine>();
 
-      if (env.IsDevelopment()) {
-        services.AddDbContext<DataContext>(options =>
-          options.UseMySql(
-            configuration.GetConnectionString("DefaultConnection")
-          )
-        );
-      } else {
-        services.AddDbContext<DataContext>(options =>
-          options.UseSqlServer(
-            configuration.GetConnectionString("DefaultConnection")
-          )
-        );
-      }
+      services.AddDbContext<DataContext>(options =>
+        options.UseSqlServer(
+          configuration.GetConnectionString("DefaultConnection")
+        )
+      );
     }
   }
 }
