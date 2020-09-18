@@ -39,7 +39,7 @@ namespace Pulse.Matchmaker.Matches {
         .FirstOrDefault(x => x.Id == matchId);
     }
 
-    public MatchModel UpdateMatch(Match match, ResultModel result) {
+    public MatchResponse UpdateMatch(Match match, ResultModel result) {
       // Retrieve data from the latest match information
       if (match.Status == MatchStatus.InProgress && match.UpdatedAt.AddSeconds(30) < DateTime.UtcNow) {
         match = UpdateMatchResult(match, result);
@@ -47,7 +47,7 @@ namespace Pulse.Matchmaker.Matches {
         _context.SaveChanges();
       }
 
-      return _mapper.Map<MatchModel>(match);
+      return _mapper.Map<MatchResponse>(match);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ namespace Pulse.Matchmaker.Matches {
         .FirstOrDefault();
     }
 
-    public PagedMatchModel GetRecent(int? playerId, int? opponentId, int skip, int take) {
+    public PagedMatchResponse GetRecent(int? playerId, int? opponentId, int skip, int take) {
       var q = _context.Matches
         .Include(x => x.MatchPlayers)
         .ThenInclude(x => x.Player)
@@ -114,14 +114,14 @@ namespace Pulse.Matchmaker.Matches {
         .Take(take)
         .ToList();
 
-      var results = _mapper.Map<List<MatchModel>>(match);
+      var results = _mapper.Map<List<MatchResponse>>(match);
 
-      return new PagedMatchModel() {
+      return new PagedMatchResponse() {
         Total = total,
           Results = results
       };
     }
-    public PagedMatchModel GetRecent(string player, string opponent, int skip, int take) {
+    public PagedMatchResponse GetRecent(string player, string opponent, int skip, int take) {
       var q = _context.Matches
         .Include(x => x.MatchPlayers)
         .ThenInclude(x => x.Player)
@@ -138,9 +138,9 @@ namespace Pulse.Matchmaker.Matches {
         .Take(take)
         .ToList();
 
-      var results = _mapper.Map<List<MatchModel>>(match);
+      var results = _mapper.Map<List<MatchResponse>>(match);
 
-      return new PagedMatchModel() {
+      return new PagedMatchResponse() {
         Total = total,
           Results = results
       };

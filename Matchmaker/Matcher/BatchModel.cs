@@ -15,14 +15,14 @@ namespace Pulse.Matchmaker.Matcher {
 
     }
 
-    public class PotentialMatchModel : IComparable<PotentialMatchModel> {
+    public class PotentialMatchResponse : IComparable<PotentialMatchResponse> {
         public double Score { get; } = 0;
         public List<string> PlayerList { get; } = new List<string>();
         private double _avoidRecentMatchesMultiplier = 10;
 
         private double _reduceWaitMultiplier = 1;
 
-        public PotentialMatchModel(List<SeekModel> players) {
+        public PotentialMatchResponse(List<SeekModel> players) {
             this.addPlayers(players);
             this.Score = 0;
             this.Score += this.getRatingDifference(players);
@@ -30,7 +30,7 @@ namespace Pulse.Matchmaker.Matcher {
             this.Score -= this.getTotalWaitTime(players) * this._reduceWaitMultiplier;
         }
 
-        public int CompareTo(PotentialMatchModel other) {
+        public int CompareTo(PotentialMatchResponse other) {
             return this.Score.CompareTo(other.Score);
         }
 

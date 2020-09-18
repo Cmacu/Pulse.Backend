@@ -29,7 +29,7 @@ namespace Pulse.Matchmaker.Matches {
         [HttpGet]
         [Authorize]
         [Route("")]
-        public ActionResult<PagedMatchModel> Get(string player, string opponent, int skip, int take) {
+        public ActionResult<PagedMatchResponse> Get(string player, string opponent, int skip, int take) {
             return _matchService.GetRecent(player, opponent, skip, take);
         }
 
@@ -40,7 +40,7 @@ namespace Pulse.Matchmaker.Matches {
         [HttpGet]
         [Authorize]
         [Route("Last")]
-        public ActionResult<MatchModel> Last() {
+        public ActionResult<MatchResponse> Last() {
             var playerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var lastMatch = _matchService.GetLastMatchByPlayerId(playerId);
 
@@ -60,7 +60,7 @@ namespace Pulse.Matchmaker.Matches {
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         [Route("Update")]
-        public ActionResult<MatchModel> Update(int matchId) {
+        public ActionResult<MatchResponse> Update(int matchId) {
             var match = _matchService.Find(matchId);
             var result = new ResultModel();
             return _matchService.UpdateMatch(match, result);

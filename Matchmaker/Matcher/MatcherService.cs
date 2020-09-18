@@ -11,7 +11,7 @@ namespace Pulse.Matchmaker.Matcher {
 
     public class GroupAndSortMatcher : MatchmakerMatcher {
         private IReadOnlyList<SeekModel> _sortedPlayers;
-        private List<PotentialMatchModel> _potentialMatches = new List<PotentialMatchModel>();
+        private List<PotentialMatchResponse> _potentialMatches = new List<PotentialMatchResponse>();
         public GroupAndSortMatcher(IReadOnlyList<SeekModel> sortedPlayers) : base(sortedPlayers) {
             this._sortedPlayers = sortedPlayers;
         }
@@ -24,16 +24,16 @@ namespace Pulse.Matchmaker.Matcher {
                 for (int j = 1; j < playersPerMatch; j++) {
                     potentialPlayers.Add(this._sortedPlayers[i + j]);
                 }
-                this._potentialMatches.Add(new PotentialMatchModel(potentialPlayers));
+                this._potentialMatches.Add(new PotentialMatchResponse(potentialPlayers));
             }
         }
 
         public List<BatchModel> getMatches(int scoreLimit) {
             var matches = new List<BatchModel>();
             var matchedPlayers = new List<string>();
-            foreach (var potentialMatchModel in _potentialMatches.OrderBy(x => x.Score)) {
-                if (potentialMatchModel.Score > scoreLimit) break;
-                var players = potentialMatchModel.PlayerList;
+            foreach (var potentialMatchResponse in _potentialMatches.OrderBy(x => x.Score)) {
+                if (potentialMatchResponse.Score > scoreLimit) break;
+                var players = potentialMatchResponse.PlayerList;
                 if (players.Where(player => matchedPlayers.Contains(player)).Count() > 0) {
                     continue;
                 }

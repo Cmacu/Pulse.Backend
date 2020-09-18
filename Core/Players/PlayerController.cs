@@ -26,7 +26,7 @@ namespace Pulse.Core.Players {
         [HttpGet]
         [Authorize]
         [Route("")]
-        public ActionResult<PlayerModel> Get() {
+        public ActionResult<PlayerResponse> Get() {
             var playerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             var model = _playerService.Get(playerId);
 
@@ -42,7 +42,7 @@ namespace Pulse.Core.Players {
         [HttpGet]
         [Authorize]
         [Route("settings")]
-        public ActionResult<PlayerSettingsModel> Settings() {
+        public ActionResult<PlayerSettingsResponse> Settings() {
             var playerId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
             return _playerSettingService.Get(playerId);
         }
@@ -82,7 +82,7 @@ namespace Pulse.Core.Players {
         [HttpGet]
         [Authorize]
         [Route("{username}")]
-        public ActionResult<PlayerModel> Get(string username) {
+        public ActionResult<PlayerResponse> Get(string username) {
             return _playerService.Get(username);
         }
 

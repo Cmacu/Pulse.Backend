@@ -15,9 +15,9 @@ namespace Pulse.Core.PlayerSettings {
         /// </summary>
         /// <param name="playerId">The ID of the player to fetch settings.</param>
         /// <returns>The settings for the given player.</returns>
-        public PlayerSettingsModel Get(int playerId) {
+        public PlayerSettingsResponse Get(int playerId) {
             var settings = _context.PlayerSettings.Where(x => x.PlayerId == playerId);
-            var model = new PlayerSettingsModel();
+            var model = new PlayerSettingsResponse();
 
             foreach (var setting in settings) {
                 var prop = model.GetType().GetProperty(setting.Name);
@@ -37,7 +37,7 @@ namespace Pulse.Core.PlayerSettings {
         /// <param name="name">The name of the setting, e.g. "EmailNotifications"</param>
         /// <param name="value">The value of the setting, e.g. "1"</param>
         public void Set(int playerId, string name, string value) {
-            var properties = typeof(PlayerSettingsModel).GetProperties();
+            var properties = typeof(PlayerSettingsResponse).GetProperties();
             if (!properties.Any(x => x.Name == name))
                 throw new InvalidOperationException($"Setting not available: {name}");
 

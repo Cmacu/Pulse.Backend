@@ -1,8 +1,8 @@
 ﻿namespace Pulse.Core.PlayerSettings {
-    public class PlayerSettingsModel {
+    public class PlayerSettingsResponse {
         public bool EmailNotifications { get; set; }
 
-        public PlayerSettingsModel() {
+        public PlayerSettingsResponse() {
             EmailNotifications = true;
         }
     }

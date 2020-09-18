@@ -6,6 +6,7 @@ namespace Pulse.Games.SchottenTotten2.Storage {
   public class Schotten2Game {
     public int Id { get; set; }
     public string MatchId { get; set; }
+    public string MatchName { get; set; }
     public string AttackerId { get; set; }
     public string DefenderId { get; set; }
     public string WinnerId { get; set; }
