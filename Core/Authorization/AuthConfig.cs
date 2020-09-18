@@ -11,6 +11,7 @@ namespace Pulse.Core.Authorization {
       @"^(?("")("".+?(?<!\\)""@)|(([0-9a-z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-z])@))" +
       @"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-z][-0-9a-z]*[0-9a-z]*\.)+[a-z0-9][\-a-z0-9]{0,22}[a-z0-9]))$";
     public readonly string EmailError = "Invalid email: {0}";
+    public readonly string UsernameError = "Invalid username";
     public readonly string RefreshTokenError = "Invalid refresh token";
     public readonly string AccessCodeError = "Invalid access code!";
     public readonly string AccessTokenError = "Invalid access token";

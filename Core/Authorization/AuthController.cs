@@ -14,10 +14,28 @@ namespace Pulse.Core.Authorization {
 
     [HttpGet]
     [Route("request")]
-    public ActionResult RequestAccess(string email) {
+    public ActionResult<bool> RequestAccess(string email) {
       try {
-        _authService.SendAccessCode(email);
-        return Ok();
+        return _authService.SendAccessCode(email);
+      } catch (Exception ex) {
+        return Unauthorized(ex.Message);
+      }
+    }
+
+    [HttpGet]
+    [Route("find")]
+    public ActionResult<bool> Find(string username) {
+      return _authService.FindPlayer(username);
+    }
+
+    [HttpGet]
+    [Route("register")]
+    public ActionResult<AuthResponse> Register(string email, string accessCode, string username) {
+      try {
+        var playerId = _authService.Register(email, accessCode, username);
+        var ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+        var browser = Request.Headers["User-Agent"].ToString();
+        return _authService.CreateSession(playerId, email, ipAddress, accessCode);
       } catch (Exception ex) {
         return Unauthorized(ex.Message);
       }
@@ -30,11 +48,12 @@ namespace Pulse.Core.Authorization {
     /// <param name="accessCode">The code provided by email</param>
     [HttpGet]
     [Route("login")]
-    public ActionResult<AuthModel> Login(string email, string accessCode) {
+    public ActionResult<AuthResponse> Login(string email, string accessCode) {
       try {
-        var browser = Request.Headers["User-Agent"].ToString();
+        var playerId = _authService.Login(email, accessCode);
         var ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
-        return _authService.Login(email, accessCode, ipAddress, browser);
+        var browser = Request.Headers["User-Agent"].ToString();
+        return _authService.CreateSession(playerId, email, ipAddress, accessCode);
       } catch (Exception ex) {
         return Unauthorized(ex.Message);
       }
@@ -42,7 +61,7 @@ namespace Pulse.Core.Authorization {
 
     [HttpGet]
     [Route("refresh")]
-    public ActionResult<AuthModel> Refresh(string accessToken, string refreshToken) {
+    public ActionResult<AuthResponse> Refresh(string accessToken, string refreshToken) {
       try {
         var ipAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
         return _authService.Refresh(accessToken, refreshToken, ipAddress);
