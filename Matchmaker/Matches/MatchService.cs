@@ -172,7 +172,7 @@ namespace Pulse.Matchmaker.Matches {
       // Match is over. Handle match completion
       match.EndDate = DateTime.UtcNow;
       foreach (var matchPlayer in match.MatchPlayers) {
-        this.UpdateMatchPlayer(matchPlayer, result);
+        UpdateMatchPlayer(matchPlayer, result);
       }
 
       _ratingService.RateMatch(match);
@@ -187,7 +187,7 @@ namespace Pulse.Matchmaker.Matches {
 
     private int GetPlayerDecay(Player player) {
       if (player.Division != Division.Master) return 0;
-      var lastMatch = this.GetLastMatchByPlayerId(player.Id);
+      var lastMatch = GetLastMatchByPlayerId(player.Id);
       if (lastMatch == null) return 0;
       var previousDecay = lastMatch.MatchPlayers.ToList().Where(x => x.PlayerId == player.Id).Select(x => x.DecayDays).FirstOrDefault();
       return _decayService.GetDecaySteps(previousDecay, lastMatch.StartDate);

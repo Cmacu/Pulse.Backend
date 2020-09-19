@@ -115,7 +115,7 @@ namespace Pulse.Ranking.Leaderboard {
       _matchService.CompleteMatches();
       while ((DateTime.UtcNow - lastGeneratedAt).TotalHours > 24d) {
         lastGeneratedAt = lastGeneratedAt.AddHours(24);
-        this.ComputeDay(lastGeneratedAt);
+        ComputeDay(lastGeneratedAt);
       }
 
       return lastGeneratedAt;

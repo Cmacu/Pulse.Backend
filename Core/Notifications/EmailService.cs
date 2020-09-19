@@ -42,14 +42,14 @@ namespace Pulse.Core.Notifications {
       var toAddress = _internalAddress;
       var subject = $"Pulse Unhandled: {ex.Message}";
       var body = ex.ToString();
-      await this.SendMany(toAddress, subject, body);
+      await SendMany(toAddress, subject, body);
     }
 
     public async void SendMatchmakerAddNotification(SeekModel seek) {
       var toAddress = _internalAddress;
       var subject = $"Pulse: PlayerId {seek.Player} joined the pool";
       var body = JsonConvert.SerializeObject(seek);
-      await this.SendMany(toAddress, subject, body);
+      await SendMany(toAddress, subject, body);
     }
 
     public async void SendAuthorizationLink(Player player) {
@@ -74,7 +74,7 @@ namespace Pulse.Core.Notifications {
                 <br><br>
                 You can disable email notifications from the settings: {_domain}/settings#emailNotifications
             ";
-      await this.Send(new EmailAddress(player.Email, player.Username), subject, body);
+      await Send(new EmailAddress(player.Email, player.Username), subject, body);
     }
 
     private async Task SendMany(List<EmailAddress> toAddress, string subject, string body) {

@@ -13,7 +13,7 @@ namespace Pulse.Games.SchottenTotten2.Cards {
           deck.Add(card);
         }
 
-      deck = this.Shuffle(deck);
+      deck = Shuffle(deck);
       return deck;
     }
 
