@@ -8,6 +8,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
     public readonly int HandSize = 6;
     public readonly int OilCount = 3;
     public readonly int OilIndex = 0;
+    public readonly Dictionary<string, int> Archenemies = new Dictionary<string, int> { { "0", 11 }, { "11", 0 } };
 
     public Section GetSection(string name, bool isDamaged = false) {
       var cardSpaces = 3;

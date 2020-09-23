@@ -75,27 +75,28 @@ namespace Pulse.Games.SchottenTotten2.Game {
       if (formation.Count >= section.Spaces) throw new ForbiddenException("Formation capacity reached.");
       var hand = state.IsAttackersTurn ? state.AttackerCards : state.DefenderCards;
       if (handIndex < 0 || handIndex >= hand.Count) throw new ForbiddenException("Invalid Hand Card.");
-
       var card = hand[handIndex];
-      formation.Add(card);
-      hand.RemoveAt(handIndex);
-      if (CheckControl(state)) {
-        state.AttackerCards = new List<Card>();
-        return state;
+      if (!HasArchenemy(card, state.IsAttackersTurn ? section.Defense : section.Attack, state.DiscardCards)) {
+        formation.Add(card);
       }
-      if (state.IsAttackersTurn && state.SiegeCards.Count == 0) {
+
+      if (CheckControl(state)) {
         state.DefenderCards = new List<Card>();
         return state;
       }
+      if (state.IsAttackersTurn && state.SiegeCards.Count == 0) {
+        state.AttackerCards = new List<Card>();
+        return state;
+      }
       if (state.SiegeCards.Count != 0) {
-        hand.Add(_cardService.DrawCard(state.SiegeCards));
+        hand[handIndex] = _cardService.DrawCard(state.SiegeCards);
       }
       state.IsAttackersTurn = !state.IsAttackersTurn;
 
       return state;
     }
 
-    public bool CheckControl(GameState state) {
+    private bool CheckControl(GameState state) {
       var extraCards = new List<Card>(state.DefenderCards);
       extraCards.AddRange(state.SiegeCards);
       extraCards = state.Sections[0].SortFormation(extraCards);
@@ -111,12 +112,24 @@ namespace Pulse.Games.SchottenTotten2.Game {
       return false;
     }
 
-    public int GetDamagedCount(List<Section> sections) {
+    private int GetDamagedCount(List<Section> sections) {
       var count = 0;
       foreach (var section in sections) {
         if (section.IsDamaged) count++;
       }
       return count;
+    }
+
+    private bool HasArchenemy(Card card, List<Card> opponentFormation, List<Card> discardCards) {
+      var archenemy = _config.Archenemies.GetValueOrDefault(card.Rank.ToString());
+      if (archenemy == 0) return false;
+      var opposite = new Card() { Suit = card.Suit, Rank = archenemy };
+
+      if (!opponentFormation.Remove(opposite)) return false;
+
+      discardCards.Add(card);
+      discardCards.Add(opposite);
+      return true;
     }
   }
 }

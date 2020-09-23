@@ -1,10 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 using Pulse.Core.AppErrors;
 using Pulse.Games.SchottenTotten2.Game;
 using Pulse.Games.SchottenTotten2.Storage;
-using Pulse.Games.SchottenTotten2.Wall;
 
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
@@ -21,22 +20,25 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       _storage = storage;
     }
 
-    public void Start(string attackerId, string defenderId, string matchId) {
-      if (string.IsNullOrEmpty(attackerId)) throw new ForbiddenException("AttackerId is required!");
-      if (string.IsNullOrEmpty(defenderId)) throw new ForbiddenException("DefenderId is required!");
+    public void Start(List<string> players, string matchId) {
+      if (players.Count != 2) throw new ForbiddenException("Two players required to start a game!");
       var state = _engine.CreateGame();
-      _storage.CreateGame(matchId, attackerId, defenderId, state);
-      _storage.SaveLog(matchId, state, attackerId, "Create");
+      _storage.CreateGame(matchId, players[0].ToString(), players[1].ToString(), state);
+      _storage.SaveLog(matchId, state, players[0].ToString(), "Create");
     }
 
-    public Schotten2Response Load(string playerId) {
-      var game = _storage.LoadGame(playerId);
+    public Schotten2Game GetGame(string matchId) {
+      return _storage.LoadGame(matchId);
+    }
+
+    public Schotten2Response Load(string matchId, string playerId) {
+      var game = _storage.LoadGame(matchId);
       return MapState(game.State, playerId == game.AttackerId);
     }
 
-    public Schotten2Response Retreat(string playerId, int sectionIndex) {
+    public Schotten2Response Retreat(string matchId, string playerId, int sectionIndex) {
       // Retrieve Game
-      var game = _storage.LoadGame(playerId);
+      var game = _storage.LoadGame(matchId);
       // Validate input
       if (playerId != game.AttackerId) throw new ForbiddenException("Only attacker is allowed to retreat");
       if (!game.State.IsAttackersTurn) throw new ForbiddenException("It's defender's turn to play.");
@@ -49,8 +51,8 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       return MapState(state, playerId == game.AttackerId);
     }
 
-    public Schotten2Response PlayCard(string playerId, int sectionIndex, int handIndex) {
-      var game = _storage.LoadGame(playerId);
+    public Schotten2Response PlayCard(string matchId, string playerId, int sectionIndex, int handIndex) {
+      var game = _storage.LoadGame(matchId);
 
       if (game.State.IsAttackersTurn && game.AttackerId != playerId) throw new ForbiddenException("It's attacker's turn to play.");
       if (!game.State.IsAttackersTurn && game.DefenderId != playerId) throw new ForbiddenException("It's defenders's turn to play.");
@@ -58,16 +60,16 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
       var state = _engine.PlayCard(game.State, sectionIndex, handIndex);
 
-      if (state.AttackerCards.Count == 0) game.WinnerId = game.AttackerId;
-      if (state.DefenderCards.Count == 0) game.WinnerId = game.DefenderId;
+      if (state.AttackerCards.Count == 0) game.WinnerId = game.DefenderId;
+      if (state.DefenderCards.Count == 0) game.WinnerId = game.AttackerId;
 
       _storage.UpdateGame(game.MatchId, state);
       _storage.SaveLog(game.MatchId, state, playerId, "PlayCard", sectionIndex, handIndex);
       return MapState(state, playerId == game.AttackerId);
     }
 
-    public Schotten2Response UseOil(string playerId, int sectionIndex) {
-      var game = _storage.LoadGame(playerId);
+    public Schotten2Response UseOil(string matchId, string playerId, int sectionIndex) {
+      var game = _storage.LoadGame(matchId);
       if (playerId != game.AttackerId) throw new ForbiddenException("Only defender can use oil");
       if (game.State.OilCount == 0) throw new ForbiddenException("There are no more oil left to use");
       if (game.State.IsAttackersTurn) throw new ForbiddenException("It's attacker's turn to play.");
@@ -81,8 +83,8 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       return MapState(state, playerId == game.AttackerId);
     }
 
-    public Schotten2Response Exit(string playerId, ExitType exitType) {
-      var game = _storage.LoadGame(playerId);
+    public Schotten2Response Exit(string matchId, string playerId, ExitType exitType) {
+      var game = _storage.LoadGame(matchId);
 
       if (playerId == game.AttackerId) game.WinnerId = game.DefenderId;
       else if (playerId == game.DefenderId) game.WinnerId = game.AttackerId;
@@ -96,11 +98,12 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
     public Schotten2Response MapState(GameState state, bool isAttacker) {
       var model = new Schotten2Response() {
-        isAttacker = isAttacker,
-        isAttackerTurn = state.IsAttackersTurn,
+        IsAttacker = isAttacker,
+        IsCurrentPlayer = (isAttacker && state.IsAttackersTurn) || (!isAttacker && !state.IsAttackersTurn),
         OilCount = state.OilCount,
         Sections = state.Sections,
         HandCards = isAttacker ? state.AttackerCards : state.DefenderCards,
+        OpponentCardsCount = (isAttacker ? state.AttackerCards : state.DefenderCards).Count,
         SiegeCardsCount = state.SiegeCards.Count,
         DiscardCards = state.DiscardCards,
       };

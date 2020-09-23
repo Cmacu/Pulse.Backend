@@ -24,5 +24,20 @@ namespace Pulse.Games.SchottenTotten2.Cards {
         _rank = value;
       }
     }
+
+    public override bool Equals(object obj) {
+      if (obj == null || GetType() != obj.GetType()) {
+        return false;
+      }
+      return Equals(obj as Card);
+    }
+
+    public bool Equals(Card obj) {
+      return obj != null && obj.Suit == this.Suit && obj.Rank == this.Rank;
+    }
+
+    public override int GetHashCode() {
+      return base.GetHashCode();
+    }
   }
 }

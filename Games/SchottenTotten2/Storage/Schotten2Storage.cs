@@ -18,23 +18,12 @@ namespace Pulse.Games.SchottenTotten2.Storage {
       _cache = cache;
     }
 
-    public Schotten2Game LoadGame(string playerId) {
-      var matchId = _cache.GetFromPlayer(playerId);
-      Schotten2Game game;
-      if (string.IsNullOrEmpty(matchId)) {
-        game = FindGame(playerId);
-        _cache.SetPlayer(game.AttackerId, game.MatchId);
-        _cache.SetPlayer(game.DefenderId, game.MatchId);
-      } else {
-        game = GetGame(matchId);
-      }
-      return game;
+    public Schotten2Game LoadGame(string matchId) {
+      return GetGame(matchId);
     }
 
     public void CreateGame(string matchId, string attackerId, string defenderId, GameState state) {
       _cache.Purge(DateTime.Now.AddHours(-2));
-      _cache.SetPlayer(defenderId, matchId);
-      _cache.SetPlayer(attackerId, matchId);
       AddGame(matchId, attackerId, defenderId, state);
     }
 
@@ -45,7 +34,7 @@ namespace Pulse.Games.SchottenTotten2.Storage {
       if (string.IsNullOrEmpty(game.WinnerId)) {
         _cache.SetGame(game);
       } else {
-        CompleteGame(game.MatchId, game.AttackerId, game.DefenderId);
+        CompleteGame(matchId);
       }
       using(var scope = _scopeFactory.CreateScope()) {
         var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
@@ -55,9 +44,7 @@ namespace Pulse.Games.SchottenTotten2.Storage {
       return Task.CompletedTask;
     }
 
-    public Task CompleteGame(string matchId, string attackerId, string defenderId) {
-      _cache.RemovePlayer(attackerId);
-      _cache.RemovePlayer(defenderId);
+    public Task CompleteGame(string matchId) {
       _cache.RemoveGame(matchId);
       return Task.CompletedTask;
     }
@@ -115,14 +102,11 @@ namespace Pulse.Games.SchottenTotten2.Storage {
     private Schotten2Game GetGame(string matchId) {
       var game = _cache.GetGame(matchId);
       if (game != null) return game;
-
       game = _context.Schotten2Games.FirstOrDefault(x => x.MatchId == matchId);
-
-      if (game == null) throw new InternalException($"Game {matchId} not found!");
-      if (!string.IsNullOrEmpty(game.WinnerId)) throw new NotFoundException("Game is over");
-
-      _cache.SetGame(game);
-
+      if (game == null) throw new NotFoundException($"Game {matchId} not found!");
+      if (string.IsNullOrEmpty(game.WinnerId)) {
+        _cache.SetGame(game);
+      }
       return game;
     }
   }

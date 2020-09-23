@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
   [ApiController]
-  // [Authorize]
+  [Authorize]
   [Route("[controller]")]
   public class Schotten2Controller : ControllerBase {
     private Schotten2Service _service;
@@ -17,48 +17,49 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
     [HttpGet]
     [Route("")]
-    public ActionResult<Schotten2Response> Load(string playerId) {
-      // var playerId = User.FindFirst(ClaimTypes.NameIdentifier).ToString();
-      return _service.Load(playerId);
+    public ActionResult<Schotten2Response> Load(string matchId) {
+      var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      return _service.Load(matchId, playerId);
     }
 
     [HttpGet]
     [Route("start")]
-    public ActionResult<Schotten2Response> Start(string playerId, string opponentId) {
-      // var playerId = User.FindFirst(ClaimTypes.NameIdentifier).ToString();
-      var r = new Random();
+    public ActionResult<Schotten2Response> Start(string opponentId) {
+      var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
       var players = new List<string>() { playerId, opponentId };
+      var r = new Random();
       players.Sort((x, y) => r.Next(0, 100) - r.Next(0, 100));
-      _service.Start(players[0], players[1], Guid.NewGuid().ToString().Split('-') [2]);
-      return _service.Load(playerId);
+      var matchId = Guid.NewGuid().ToString().Split('-') [2];
+      _service.Start(players, matchId);
+      return _service.Load(matchId, playerId.ToString());
     }
 
     [HttpGet]
     [Route("retreat")]
-    public ActionResult<Schotten2Response> Retreat(string playerId, int sectionIndex) {
-      // var playerId = User.FindFirst(ClaimTypes.NameIdentifier).ToString();
-      return _service.Retreat(playerId, sectionIndex);
+    public ActionResult<Schotten2Response> Retreat(string matchId, int sectionIndex) {
+      var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      return _service.Retreat(matchId, playerId, sectionIndex);
     }
 
     [HttpGet]
     [Route("oil")]
-    public ActionResult<Schotten2Response> UseOil(string playerId, int sectionIndex) {
-      // var playerId = User.FindFirst(ClaimTypes.NameIdentifier).ToString();
-      return _service.UseOil(playerId, sectionIndex);
+    public ActionResult<Schotten2Response> UseOil(string matchId, int sectionIndex) {
+      var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      return _service.UseOil(matchId, playerId, sectionIndex);
     }
 
     [HttpGet]
     [Route("card")]
-    public ActionResult<Schotten2Response> PlayCard(string playerId, int sectionIndex, int handIndex) {
-      // var playerId = User.FindFirst(ClaimTypes.NameIdentifier).ToString();
-      return _service.PlayCard(playerId, sectionIndex, handIndex);
+    public ActionResult<Schotten2Response> PlayCard(string matchId, int sectionIndex, int handIndex) {
+      var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      return _service.PlayCard(matchId, playerId, sectionIndex, handIndex);
     }
 
     [HttpGet]
     [Route("resign")]
-    public ActionResult<Schotten2Response> Resign(string playerId) {
-      // var playerId = User.FindFirst(ClaimTypes.NameIdentifier).ToString();
-      return _service.Exit(playerId, ExitType.Resign);
+    public ActionResult<Schotten2Response> Resign(string matchId) {
+      var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+      return _service.Exit(matchId, playerId, ExitType.Resign);
     }
   }
 }
