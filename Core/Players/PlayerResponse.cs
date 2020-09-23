@@ -8,6 +8,7 @@ namespace Pulse.Core.Players {
     public string Avatar { get; set; }
     public string Country { get; set; }
     public string Status { get; set; }
+    public string MatchId { get; set; }
     public Division Division { get; set; }
     public int Level { get; set; }
     public int TotalWins { get; set; }

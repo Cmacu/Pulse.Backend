@@ -96,16 +96,17 @@ namespace Pulse.Core.Players {
         .FirstOrDefault(x => string.IsNullOrEmpty(username) ? x.Player.Id == playerId : x.Player.Username == username);
       if (row == null) throw new NotFoundException("Player not found");
 
-      var model = _mapper.Map<PlayerResponse>(row.Player);
-      model.ConservativeRating = _ratingService.GetConservative(row.Player.RatingMean, row.Player.RatingDeviation);
+      var response = _mapper.Map<PlayerResponse>(row.Player);
+      response.ConservativeRating = _ratingService.GetConservative(row.Player.RatingMean, row.Player.RatingDeviation);
 
       if (row.LastMatch != null) {
+        response.MatchId = row.LastMatch.Id.ToString();
         var decayStep = _decayService.GetDecaySteps(row.LastMatch.DecayDays, row.LastMatch.Match.StartDate);
-        model.TotalDecay = _decayService.GetDecayValues(decayStep);
-        model.RegainDecay = _decayService.GetDecayValue(decayStep);
+        response.TotalDecay = _decayService.GetDecayValues(decayStep);
+        response.RegainDecay = _decayService.GetDecayValue(decayStep);
       }
 
-      return model;
+      return response;
     }
 
   }
