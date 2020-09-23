@@ -55,9 +55,8 @@ namespace Pulse.Matchmaker.Matches {
     /// </summary>
     /// <param name="playerIds">The IDs of the players in the match.</param>
     /// <returns>The database ID of the new match.</returns>
-    public Match CreateMatch(List<int> playerIds, int gameId) {
+    public int CreateMatch(List<int> playerIds) {
       var name = GenerateMatchName();
-
       var match = new Match() {
         Name = name,
         StartDate = DateTime.UtcNow,
@@ -85,7 +84,7 @@ namespace Pulse.Matchmaker.Matches {
       _context.Add(match);
       _context.SaveChanges();
 
-      return match;
+      return match.Id;
     }
 
     public Match GetLastMatchByPlayerId(int playerId) {
@@ -194,13 +193,13 @@ namespace Pulse.Matchmaker.Matches {
     }
 
     private void UpdateMatchPlayer(MatchPlayer matchPlayer, ResultModel result) {
-      var username = matchPlayer.Player.Username;
-      var player = result.Players.First(x => x.Username == username);
+      var playerId = matchPlayer.Player.Id.ToString();
+      var player = result.Players.First(x => x.PlayerId == playerId);
       matchPlayer.Score = player.Score;
       matchPlayer.Status = player.Status;
 
       // If the scores are tied, the player in the lower position loses the tiebreak
-      matchPlayer.IsWin = ((double) matchPlayer.Score + ((double) matchPlayer.Position * 0.25)) > (double) result.Players.Where(x => x.Username != username).Max(x => x.Score);
+      matchPlayer.IsWin = ((double) matchPlayer.Score + ((double) matchPlayer.Position * 0.25)) > (double) result.Players.Where(x => x.PlayerId != playerId).Max(x => x.Score);
 
       var newDivision = _ratingService.GetNewDivisionAndLevel(matchPlayer.Player.Division, matchPlayer.Player.Level, matchPlayer.IsWin);
       matchPlayer.Player.Division = newDivision.Division;

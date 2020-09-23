@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Pulse.Matchmaker.Matcher {
-  public class BatchModel : List<string> {
-    public List<int> ToList() {
-      return this.Select(int.Parse).ToList();
-    }
-
-    public List<int> Randomize() {
+  public class MatchedPlayers : List<string> {
+    public List<string> Randomize() {
       var r = new Random();
-      return this.OrderBy(x => r.Next()).Select(int.Parse).ToList();
+      return this.OrderBy(x => r.Next()).ToList();
     }
 
   }

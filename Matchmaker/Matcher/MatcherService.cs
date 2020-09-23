@@ -28,8 +28,8 @@ namespace Pulse.Matchmaker.Matcher {
       }
     }
 
-    public List<BatchModel> getMatches(int scoreLimit) {
-      var matches = new List<BatchModel>();
+    public List<MatchedPlayers> getMatches(int scoreLimit) {
+      var matches = new List<MatchedPlayers>();
       var matchedPlayers = new List<string>();
       foreach (var potentialMatchResponse in _potentialMatches.OrderBy(x => x.Score)) {
         if (potentialMatchResponse.Score > scoreLimit) break;
@@ -38,7 +38,7 @@ namespace Pulse.Matchmaker.Matcher {
           continue;
         }
         matchedPlayers.AddRange(players);
-        var match = new BatchModel();
+        var match = new MatchedPlayers();
         match.AddRange(players);
         matches.Add(match);
       }

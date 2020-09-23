@@ -82,8 +82,8 @@ namespace Pulse.Matchmaker.Matcher {
       return Clients.Users(match).Error("Error creating match.");
     }
 
-    private Task OnPlaying(IReadOnlyList<string> match) {
-      return Clients.Users(match).Playing("Match started!");
+    private Task OnPlaying(IReadOnlyList<string> match, string matchId) {
+      return Clients.Users(match).Playing(matchId);
     }
   }
 }

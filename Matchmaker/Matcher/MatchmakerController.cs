@@ -85,9 +85,9 @@ namespace Pulse.Matchmaker.Matcher {
     [HttpGet]
     [Authorize(Roles = "Administrator")]
     [Route("Run")]
-    public ActionResult<List<BatchModel>> Run() {
-      var result = new List<BatchModel>();
-      var matches = _matchmakerService.Run((match) => Task.CompletedTask, (match) => Task.CompletedTask, (match) => Task.CompletedTask);
+    public ActionResult<List<MatchedPlayers>> Run() {
+      var result = new List<MatchedPlayers>();
+      var matches = _matchmakerService.Run((match) => Task.CompletedTask, (match, matchId) => Task.CompletedTask, (match) => Task.CompletedTask);
       if (matches == null) {
         return result;
       }
