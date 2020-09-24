@@ -31,12 +31,15 @@ namespace Pulse.Games.SchottenTotten2.Game {
       // Setup State
       var state = new GameState() {
         IsAttackersTurn = true,
+        EnablePreparation = true,
         OilCount = _config.OilCount,
+        NewCards = 0,
         Sections = CreateSections(),
         SiegeCards = siegeCards,
         AttackerCards = attackerCards,
         DefenderCards = defenderCards,
         DiscardCards = new List<Card>(),
+        LastEvent = GameEvent.Start,
       };
       return state;
     }
@@ -45,6 +48,9 @@ namespace Pulse.Games.SchottenTotten2.Game {
       var cards = state.Sections[sectionIndex].Attack;
       state.DiscardCards.AddRange(cards);
       state.Sections[sectionIndex].Attack = new List<Card>();
+      state.NewCards = 0;
+      state.EnablePreparation = true;
+      state.LastEvent = GameEvent.Retreat;
       return state;
     }
 
@@ -65,16 +71,21 @@ namespace Pulse.Games.SchottenTotten2.Game {
       state.DiscardCards.Add(cards[oilIndex]);
       cards.RemoveAt(oilIndex);
       state.OilCount--;
+      state.EnablePreparation = false;
+      state.LastEvent = GameEvent.UseOil;
 
       return state;
     }
 
     public GameState PlayCard(GameState state, int sectionIndex, int handIndex) {
+      var hand = state.IsAttackersTurn ? state.AttackerCards : state.DefenderCards;
+      if (handIndex < 0 || handIndex >= hand.Count) throw new ForbiddenException("Invalid Hand Card.");
+
       var section = state.Sections[sectionIndex];
       var formation = state.IsAttackersTurn ? section.Attack : section.Defense;
       if (formation.Count >= section.Spaces) throw new ForbiddenException("Formation capacity reached.");
-      var hand = state.IsAttackersTurn ? state.AttackerCards : state.DefenderCards;
-      if (handIndex < 0 || handIndex >= hand.Count) throw new ForbiddenException("Invalid Hand Card.");
+
+      state.LastEvent = GameEvent.PlayCard;
       var card = hand[handIndex];
       if (!HasArchenemy(card, state.IsAttackersTurn ? section.Defense : section.Attack, state.DiscardCards)) {
         formation.Add(card);
@@ -90,6 +101,8 @@ namespace Pulse.Games.SchottenTotten2.Game {
       }
       if (state.SiegeCards.Count != 0) {
         hand[handIndex] = _cardService.DrawCard(state.SiegeCards);
+        state.NewCards = 1;
+        state.EnablePreparation = true;
       }
       state.IsAttackersTurn = !state.IsAttackersTurn;
 

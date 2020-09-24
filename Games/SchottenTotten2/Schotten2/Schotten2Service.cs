@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Pulse.Core.AppErrors;
 using Pulse.Games.SchottenTotten2.Game;
 using Pulse.Games.SchottenTotten2.Storage;
@@ -27,31 +26,28 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       _storage.SaveLog(matchId, state, players[0].ToString(), "Create");
     }
 
-    public Schotten2Game GetGame(string matchId) {
-      return _storage.LoadGame(matchId);
-    }
-
-    public Schotten2Response Load(string matchId, string playerId) {
+    public Schotten2Game Load(string matchId) {
       var game = _storage.LoadGame(matchId);
-      return MapState(game.State, playerId == game.AttackerId);
+      return game;
     }
 
-    public Schotten2Response Retreat(string matchId, string playerId, int sectionIndex) {
+    public Schotten2Game Retreat(string matchId, string playerId, int sectionIndex) {
       // Retrieve Game
       var game = _storage.LoadGame(matchId);
       // Validate input
       if (playerId != game.AttackerId) throw new ForbiddenException("Only attacker is allowed to retreat");
       if (!game.State.IsAttackersTurn) throw new ForbiddenException("It's defender's turn to play.");
       if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("InvalidInvalid Wall Section.");
+      if (!game.State.EnablePreparation) throw new ForbiddenException("Retreat is only allowed during preparation.");
       // Perform action
       var state = _engine.Retreat(game.State, sectionIndex);
       // Update state
       _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, playerId, "Retreat", sectionIndex);
-      return MapState(state, playerId == game.AttackerId);
+      _storage.SaveLog(game.MatchId, state, "", "Retreat", sectionIndex);
+      return game;
     }
 
-    public Schotten2Response PlayCard(string matchId, string playerId, int sectionIndex, int handIndex) {
+    public Schotten2Game PlayCard(string matchId, string playerId, int sectionIndex, int handIndex) {
       var game = _storage.LoadGame(matchId);
 
       if (game.State.IsAttackersTurn && game.AttackerId != playerId) throw new ForbiddenException("It's attacker's turn to play.");
@@ -65,25 +61,26 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
       _storage.UpdateGame(game.MatchId, state);
       _storage.SaveLog(game.MatchId, state, playerId, "PlayCard", sectionIndex, handIndex);
-      return MapState(state, playerId == game.AttackerId);
+      return game;
     }
 
-    public Schotten2Response UseOil(string matchId, string playerId, int sectionIndex) {
+    public Schotten2Game UseOil(string matchId, string playerId, int sectionIndex) {
       var game = _storage.LoadGame(matchId);
-      if (playerId != game.AttackerId) throw new ForbiddenException("Only defender can use oil");
+      if (playerId != game.DefenderId) throw new ForbiddenException("Only defender can use oil");
       if (game.State.OilCount == 0) throw new ForbiddenException("There are no more oil left to use");
       if (game.State.IsAttackersTurn) throw new ForbiddenException("It's attacker's turn to play.");
       if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("Invalid Wall Section.");
       if (game.State.Sections[sectionIndex].Attack.Count == 0) throw new ForbiddenException("No attacker cards found on this section.");
+      if (!game.State.EnablePreparation) throw new ForbiddenException("Using oil is only allowed during preparation.");
 
       var state = _engine.UseOil(game.State, sectionIndex);
 
       _storage.UpdateGame(game.MatchId, state);
       _storage.SaveLog(game.MatchId, state, playerId, "UseOil", sectionIndex);
-      return MapState(state, playerId == game.AttackerId);
+      return game;
     }
 
-    public Schotten2Response Exit(string matchId, string playerId, ExitType exitType) {
+    public Schotten2Game Exit(string matchId, string playerId, ExitType exitType) {
       var game = _storage.LoadGame(matchId);
 
       if (playerId == game.AttackerId) game.WinnerId = game.DefenderId;
@@ -93,19 +90,26 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
       _storage.UpdateGame(game.MatchId, state);
       _storage.SaveLog(game.MatchId, state, playerId, exitType.ToString("F"));
-      return MapState(game.State, playerId == game.AttackerId);
+      return game;
     }
 
-    public Schotten2Response MapState(GameState state, bool isAttacker) {
+    public Schotten2Response MapResponse(Schotten2Game game, string playerId, int sectionIndex = -1) {
+      var isAttacker = playerId == game.AttackerId;
+      var state = game.State;
+      var isCurrentPlayer = (isAttacker && state.IsAttackersTurn) || (!isAttacker && !state.IsAttackersTurn);
       var model = new Schotten2Response() {
         IsAttacker = isAttacker,
-        IsCurrentPlayer = (isAttacker && state.IsAttackersTurn) || (!isAttacker && !state.IsAttackersTurn),
+        IsCurrentPlayer = isCurrentPlayer,
+        EnablePreparation = isCurrentPlayer && state.EnablePreparation,
+        ActiveSectionIndex = sectionIndex,
+        NewCards = state.NewCards,
         OilCount = state.OilCount,
         Sections = state.Sections,
         HandCards = isAttacker ? state.AttackerCards : state.DefenderCards,
-        OpponentCardsCount = (isAttacker ? state.AttackerCards : state.DefenderCards).Count,
+        OpponentCardsCount = (isAttacker ? state.DefenderCards : state.AttackerCards).Count,
         SiegeCardsCount = state.SiegeCards.Count,
         DiscardCards = state.DiscardCards,
+        LastEvent = state.LastEvent.ToString("F"),
       };
       return model;
     }
