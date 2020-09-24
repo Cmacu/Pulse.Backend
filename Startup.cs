@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Pulse.Backend;
 using Pulse.Core.Authorization;
+using Pulse.Games.SchottenTotten2.Schotten2;
 using Pulse.Matchmaker.Matcher;
 
 namespace Pulse {
@@ -20,6 +21,7 @@ namespace Pulse {
     private string[] _corsOrigins;
     private string _corsPolicyName;
     private string _matchmakerHubPath;
+    private string _schotten2HubPath;
     private byte[] _jwtKey;
     public Startup(IConfiguration configuration, IWebHostEnvironment env) {
       _configuration = configuration;
@@ -28,6 +30,7 @@ namespace Pulse {
       _corsOrigins = appConfig.AllowedHosts;
       _corsPolicyName = appConfig.CorsPolicyName;
       _matchmakerHubPath = appConfig.MatchmakerHubPath;
+      _schotten2HubPath = appConfig.Schotten2HubPath;
       var authConfig = new AuthConfig(configuration);
       _jwtKey = Encoding.ASCII.GetBytes(authConfig.JwtKey);
     }
@@ -67,6 +70,7 @@ namespace Pulse {
       app.UseEndpoints(endpoints => {
         endpoints.MapControllers();
         endpoints.MapHub<MatchmakerHub>(_matchmakerHubPath);
+        endpoints.MapHub<Schotten2Hub>(_schotten2HubPath);
       });
     }
 
@@ -89,9 +93,11 @@ namespace Pulse {
           OnMessageReceived = context => {
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments(_matchmakerHubPath)) {
-              context.Token = accessToken;
-            }
+            if (string.IsNullOrEmpty(accessToken)) return Task.CompletedTask;
+
+            if (path.StartsWithSegments(_matchmakerHubPath)) context.Token = accessToken;
+            if (path.StartsWithSegments(_schotten2HubPath)) context.Token = accessToken;
+
             return Task.CompletedTask;
           }
         };

@@ -6,6 +6,7 @@ namespace Pulse {
     public readonly string Domain;
     public readonly string CorsPolicyName = "AllowOrigins";
     public readonly string MatchmakerHubPath = "/matchmaker";
+    public readonly string Schotten2HubPath = "/st2hub";
     public readonly string[] AllowedHosts = new string[] {
       "https://localhost:8888",
       "http://localhost:8000",
