@@ -27,6 +27,15 @@ namespace Pulse.Matchmaker.Matches {
       _mapper = mapper;
     }
 
+    [HttpGet]
+    [Authorize]
+    [Route("{matchId}")]
+    public ActionResult<MatchResponse> Get(int matchId) {
+      var match = _matchService.Find(matchId);
+      if (match == null) return NotFound();
+      return UpdateMatch(match);
+    }
+
     /// <summary>
     /// Retrieve the most recent matches.
     /// </summary>
@@ -89,7 +98,7 @@ namespace Pulse.Matchmaker.Matches {
     }
 
     private ActionResult<MatchResponse> UpdateMatch(Match lastMatch) {
-      var game = _schotten2Service.GetGame(lastMatch.Id.ToString());
+      var game = _schotten2Service.Load(lastMatch.Id.ToString());
       var status = game.WinnerId == null ? MatchStatus.InProgress : MatchStatus.Finished;
       var attacker = new PlayerResultModel {
         PlayerId = game.AttackerId,
