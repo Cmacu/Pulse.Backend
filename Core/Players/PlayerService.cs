@@ -100,7 +100,7 @@ namespace Pulse.Core.Players {
       response.ConservativeRating = _ratingService.GetConservative(row.Player.RatingMean, row.Player.RatingDeviation);
 
       if (row.LastMatch != null) {
-        response.MatchId = row.LastMatch.Id.ToString();
+        response.MatchId = row.LastMatch.MatchId.ToString();
         var decayStep = _decayService.GetDecaySteps(row.LastMatch.DecayDays, row.LastMatch.Match.StartDate);
         response.TotalDecay = _decayService.GetDecayValues(decayStep);
         response.RegainDecay = _decayService.GetDecayValue(decayStep);
