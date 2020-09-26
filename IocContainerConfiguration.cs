@@ -54,7 +54,8 @@ namespace Pulse.Backend {
 
       services.AddDbContext<DataContext>(options =>
         options.UseSqlServer(
-          configuration.GetConnectionString("DefaultConnection")
+          configuration.GetConnectionString("DefaultConnection"),
+          options => options.EnableRetryOnFailure()
         )
       );
     }
