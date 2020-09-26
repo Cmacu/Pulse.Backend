@@ -19,7 +19,7 @@ namespace Pulse.Core.Authorization {
     public readonly int MaxRequestCount = 10;
     public readonly string RequestCountError = "Too many access attempts. Accout is blocked. Contact admin to restore access.";
     public AuthConfig(IConfiguration configuration) {
-      JwtKey = (configuration["Server:JwtKey"] ?? "pulsegames").ToCharArray();
+      JwtKey = (configuration["AuthJwtKey"] ?? "pulsegames").ToCharArray();
     }
   }
 }

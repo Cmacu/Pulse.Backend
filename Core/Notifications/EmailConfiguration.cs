@@ -8,7 +8,7 @@ namespace Pulse.Core.Notifications {
     public readonly string ApiKey;
 
     public EmailConfig(IConfiguration configuration) {
-      ApiKey = configuration.GetValue<string>("Email:ApiKey") ?? "";
+      ApiKey = configuration.GetValue<string>("EmailApiKey") ?? "";
     }
   }
 }
