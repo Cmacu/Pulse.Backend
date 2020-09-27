@@ -1,15 +1,9 @@
-using System;
 using System.Collections.Generic;
 using Pulse.Core.AppErrors;
 using Pulse.Games.SchottenTotten2.Game;
 using Pulse.Games.SchottenTotten2.Storage;
 
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
-
-  public enum ExitType {
-    Resign,
-    Timeout,
-  }
 
   public class Schotten2Service {
     private GameEngine _engine;
@@ -23,7 +17,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       if (players.Count != 2) throw new ForbiddenException("Two players required to start a game!");
       var state = _engine.CreateGame();
       _storage.CreateGame(matchId, players[0].ToString(), players[1].ToString(), state);
-      _storage.SaveLog(matchId, state, players[0].ToString(), "Create");
+      _storage.SaveLog(matchId, state, GameEvent.Start);
     }
 
     public Schotten2Game Load(string matchId) {
@@ -43,7 +37,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var state = _engine.Retreat(game.State, sectionIndex);
       // Update state
       _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, playerId, "Retreat", sectionIndex);
+      _storage.SaveLog(game.MatchId, state, GameEvent.Retreat, playerId, sectionIndex);
       return game;
     }
 
@@ -60,7 +54,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       if (state.DefenderCards.Count == 0) game.WinnerId = game.AttackerId;
 
       _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, playerId, "PlayCard", sectionIndex, handIndex);
+      _storage.SaveLog(game.MatchId, state, GameEvent.PlayCard, playerId, sectionIndex, handIndex);
       return game;
     }
 
@@ -76,11 +70,11 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var state = _engine.UseOil(game.State, sectionIndex);
 
       _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, playerId, "UseOil", sectionIndex);
+      _storage.SaveLog(game.MatchId, state, GameEvent.UseOil, playerId, sectionIndex);
       return game;
     }
 
-    public Schotten2Game Exit(string matchId, string playerId, ExitType exitType) {
+    public Schotten2Game Exit(string matchId, string playerId, GameEvent exitType) {
       var game = _storage.LoadGame(matchId);
 
       if (playerId == game.AttackerId) game.WinnerId = game.DefenderId;
@@ -89,7 +83,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var state = game.State;
 
       _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, playerId, exitType.ToString("F"));
+      _storage.SaveLog(game.MatchId, state, exitType, playerId);
       return game;
     }
 

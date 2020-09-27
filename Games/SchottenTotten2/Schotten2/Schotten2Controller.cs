@@ -63,7 +63,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     [Route("resign")]
     public ActionResult<Schotten2Response> Resign(string matchId) {
       var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-      var game = _service.Exit(matchId, playerId, ExitType.Resign);
+      var game = _service.Exit(matchId, playerId, Game.GameEvent.Resigned);
       return _service.MapResponse(game, playerId.ToString());
     }
   }

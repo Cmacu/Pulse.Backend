@@ -77,18 +77,18 @@ namespace Pulse.Games.SchottenTotten2.Storage {
     public Task SaveLog(
       string matchId,
       GameState state,
-      string playerId,
-      string action,
+      GameEvent action,
+      string playerId = null,
       int? sectionIndex = null,
       int? handIndex = null
     ) {
       var log = new Schotten2Log() {
       MatchId = matchId,
-      PlayerId = playerId,
-      Action = "Create",
-      HandIndex = handIndex,
-      SectionIndex = sectionIndex,
       State = state,
+      Action = action.ToString("F"),
+      PlayerId = playerId,
+      SectionIndex = sectionIndex,
+      HandIndex = handIndex,
       Timestamp = DateTime.UtcNow,
       };
       using(var scope = _scopeFactory.CreateScope()) {
