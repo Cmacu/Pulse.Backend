@@ -5,6 +5,7 @@ using Pulse.Games.SchottenTotten2.Cards;
 namespace Pulse.Games.SchottenTotten2.Wall {
   public class Section {
     private string _name;
+    public SectionStyle Style { get; set; }
     public string Name {
       get {
         if (string.IsNullOrEmpty(_name)) throw new InternalException("Section.Name not set yet!");

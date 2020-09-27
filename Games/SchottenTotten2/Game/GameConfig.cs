@@ -10,7 +10,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
     public readonly int OilIndex = 0;
     public readonly Dictionary<string, int> Archenemies = new Dictionary<string, int> { { "0", 11 }, { "11", 0 } };
 
-    public Section GetSection(string name, bool isDamaged = false) {
+    public Section GetSection(SectionStyle style, bool isDamaged = false) {
       var cardSpaces = 3;
       var formationTypes = new List<FormationType>() {
         FormationType.SUIT_RUN,
@@ -20,26 +20,38 @@ namespace Pulse.Games.SchottenTotten2.Game {
         FormationType.SUM
       };
 
-      if (name == "RightPit") {
-        formationTypes = new List<FormationType>() { isDamaged ? FormationType.RUN : FormationType.LOW_SUM };
-      } else if (name == "LeftPit") {
-        formationTypes = new List<FormationType>() { isDamaged ? FormationType.RUN : FormationType.SUM };
-      } else if (name == "Tower" && isDamaged) {
-        cardSpaces = 2;
-        formationTypes = new List<FormationType>() {
-          FormationType.SAME_RANK,
-          FormationType.SUM,
-        };
-      } else if (name == "Tower") {
-        cardSpaces = 4;
-      } else if (name == "Door" && isDamaged) {
-        cardSpaces = 4;
-        formationTypes.Add(FormationType.LOW_SUM);
-      } else if (name == "Door") {
-        cardSpaces = 2;
+      switch (style) {
+        case SectionStyle.RightPit:
+          cardSpaces = 3;
+          formationTypes = new List<FormationType>() { isDamaged ? FormationType.RUN : FormationType.LOW_SUM };
+          break;
+        case SectionStyle.LeftPit:
+          formationTypes = new List<FormationType>() { isDamaged ? FormationType.RUN : FormationType.SUM };
+          break;
+        case SectionStyle.Tower:
+          if (isDamaged) {
+            cardSpaces = 2;
+            formationTypes = new List<FormationType>() {
+              FormationType.SAME_RANK,
+              FormationType.SUM,
+            };
+          } else {
+            cardSpaces = 4;
+          }
+          break;
+        case SectionStyle.Door:
+          if (isDamaged) {
+            cardSpaces = 4;
+            formationTypes.Add(FormationType.LOW_SUM);
+          } else {
+            cardSpaces = 2;
+          }
+          break;
       }
+
       var section = new Section() {
-        Name = name,
+        Style = style,
+        Name = style.ToString("F"),
         IsDamaged = isDamaged,
         Spaces = cardSpaces,
         Types = formationTypes,

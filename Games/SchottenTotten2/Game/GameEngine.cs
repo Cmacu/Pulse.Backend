@@ -20,7 +20,8 @@ namespace Pulse.Games.SchottenTotten2.Game {
     public GameState CreateGame() {
 
       // Create Deck
-      var siegeCards = _cardService.CreateDeck(_config.SuitCount, _config.RankCount);
+      var deck = _cardService.CreateDeck(_config.SuitCount, _config.RankCount);
+      var siegeCards = _cardService.Shuffle(deck);
       // Draw Cards/Hands
       var attackerCards = new List<Card>();
       var defenderCards = new List<Card>();
@@ -55,13 +56,13 @@ namespace Pulse.Games.SchottenTotten2.Game {
     }
 
     private List<Section> CreateSections() {
-      var leftPit = _config.GetSection("LeftPit");
-      var leftWall = _config.GetSection("Wall");
-      var leftTower = _config.GetSection("Tower");
-      var door = _config.GetSection("Door");
-      var rightTower = _config.GetSection("Tower");
-      var rightWall = _config.GetSection("Wall");
-      var rightPit = _config.GetSection("RightPit");
+      var leftPit = _config.GetSection(SectionStyle.LeftPit);
+      var leftWall = _config.GetSection(SectionStyle.Wall);
+      var leftTower = _config.GetSection(SectionStyle.Tower);
+      var door = _config.GetSection(SectionStyle.Door);
+      var rightTower = _config.GetSection(SectionStyle.Tower);
+      var rightWall = _config.GetSection(SectionStyle.Wall);
+      var rightPit = _config.GetSection(SectionStyle.RightPit);
       return new List<Section>() { leftPit, leftTower, leftWall, door, rightWall, rightTower, rightPit };
     }
 
@@ -87,7 +88,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
 
       state.LastEvent = GameEvent.PlayCard;
       var card = hand[handIndex];
-      if (!HasArchenemy(card, state.IsAttackersTurn ? section.Defense : section.Attack, state.DiscardCards)) {
+      if (!HandleArchenemies(card, state.IsAttackersTurn ? section.Defense : section.Attack, state.DiscardCards)) {
         formation.Add(card);
       }
 
@@ -119,7 +120,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
           if (section.IsDamaged || GetDamagedCount(state.Sections) == 3) return true;
           state.DiscardCards.AddRange(section.Attack);
           state.DiscardCards.AddRange(section.Defense);
-          state.Sections[i] = _config.GetSection(section.Name, true);
+          state.Sections[i] = _config.GetSection(section.Style, true);
         }
       }
       return false;
@@ -133,7 +134,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
       return count;
     }
 
-    private bool HasArchenemy(Card card, List<Card> opponentFormation, List<Card> discardCards) {
+    private bool HandleArchenemies(Card card, List<Card> opponentFormation, List<Card> discardCards) {
       var archenemy = _config.Archenemies.GetValueOrDefault(card.Rank.ToString());
       if (archenemy == 0) return false;
       var opposite = new Card() { Suit = card.Suit, Rank = archenemy };

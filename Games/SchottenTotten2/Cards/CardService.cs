@@ -7,13 +7,13 @@ namespace Pulse.Games.SchottenTotten2.Cards {
     public List<Card> CreateDeck(int suitCount, int rankCount) {
       var deck = new List<Card>();
 
-      for (int i = 0; i < suitCount; i++)
+      for (int i = 0; i < suitCount; i++) {
         for (int j = 0; j < rankCount; j++) {
           var card = new Card() { Suit = i, Rank = j };
           deck.Add(card);
         }
+      }
 
-      deck = Shuffle(deck);
       return deck;
     }
 
@@ -24,7 +24,11 @@ namespace Pulse.Games.SchottenTotten2.Cards {
       return topCard;
     }
 
-    private List<Card> Shuffle(List<Card> deck) {
+    public List<Card> Shuffle(List<Card> deck) {
+      return FisherYatesShuffle(deck);
+    }
+
+    private List<Card> FisherYatesShuffle(List<Card> deck) {
       var random = new Random();
       for (var i = deck.Count - 1; i > 0; i--) {
         var temp = deck[i];

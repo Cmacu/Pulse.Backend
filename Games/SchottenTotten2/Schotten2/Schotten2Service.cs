@@ -37,13 +37,13 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       // Validate input
       if (playerId != game.AttackerId) throw new ForbiddenException("Only attacker is allowed to retreat");
       if (!game.State.IsAttackersTurn) throw new ForbiddenException("It's defender's turn to play.");
-      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("InvalidInvalid Wall Section.");
+      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("Invalid Wall Section.");
       if (!game.State.EnablePreparation) throw new ForbiddenException("Retreat is only allowed during preparation.");
       // Perform action
       var state = _engine.Retreat(game.State, sectionIndex);
       // Update state
       _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, "", "Retreat", sectionIndex);
+      _storage.SaveLog(game.MatchId, state, playerId, "Retreat", sectionIndex);
       return game;
     }
 
