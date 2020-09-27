@@ -72,16 +72,16 @@ namespace Pulse.Games.SchottenTotten2.Wall {
       var sum = SumFormation(formation) / 100d;
       formation = SortFormation(formation);
       foreach (var formationType in Types) {
-        if (formationType == FormationType.SUIT_RUN && CheckFormation(formation, true, false, true)) {
+        if (formationType == FormationType.SUIT_RUN && CheckSuit(formation) && CheckRun(formation)) {
           return (int) FormationType.SUIT_RUN + sum;
         }
-        if (formationType == FormationType.SAME_RANK && CheckFormation(formation, false, true, false)) {
+        if (formationType == FormationType.SAME_RANK && CheckRank(formation)) {
           return (int) FormationType.SAME_RANK + sum;
         }
-        if (formationType == FormationType.SAME_SUIT && CheckFormation(formation, true, false, false)) {
+        if (formationType == FormationType.SAME_SUIT && CheckSuit(formation)) {
           return (int) FormationType.SAME_SUIT + sum;
         }
-        if (formationType == FormationType.RUN && CheckFormation(formation, false, false, true)) {
+        if (formationType == FormationType.RUN && CheckRun(formation)) {
           return (int) FormationType.RUN + sum;
         }
         if (formationType == FormationType.LOW_SUM) {
@@ -91,13 +91,31 @@ namespace Pulse.Games.SchottenTotten2.Wall {
       return sum;
     }
 
-    private bool CheckFormation(List<Card> formation, bool checkSuit, bool checkRank, bool checkRun) {
+    private bool CheckSuit(List<Card> formation) {
       var card = formation[0];
       for (var i = 1; i < formation.Count; i++) {
         var next = formation[i];
-        if (checkSuit && card.Suit != next.Suit) return false;
-        if (checkRank && card.Rank != next.Rank) return false;
-        if (checkRun && card.Rank != next.Rank - 1) return false;
+        if (card.Suit != next.Suit) return false;
+        card = next;
+      }
+      return true;
+    }
+
+    private bool CheckRank(List<Card> formation) {
+      var card = formation[0];
+      for (var i = 1; i < formation.Count; i++) {
+        var next = formation[i];
+        if (card.Rank != next.Rank) return false;
+        card = next;
+      }
+      return true;
+    }
+
+    private bool CheckRun(List<Card> formation) {
+      var card = formation[0];
+      for (var i = 1; i < formation.Count; i++) {
+        var next = formation[i];
+        if (card.Rank != next.Rank - 1) return false;
         card = next;
       }
       return true;
