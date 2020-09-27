@@ -15,7 +15,7 @@ namespace Pulse {
 
     public AppConfig(IConfiguration configuration) {
       _configuration = configuration;
-      Domain = configuration.GetValue<string>("Server:Domain") ?? "https://localhost:5001";
+      Domain = configuration.GetValue<string>("ServerDomain") ?? "https://localhost:5001";
     }
   }
 }
