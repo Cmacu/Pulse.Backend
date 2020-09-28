@@ -66,6 +66,7 @@ namespace Pulse.Core.Authorization {
       var player = Authorize(email, accessCode);
 
       if (string.IsNullOrEmpty(username) || username.Length < 3) throw new AuthException(_authConfig.UsernameError);
+      if (!username.All(char.IsLetterOrDigit)) throw new AuthException(_authConfig.UsernameError);
 
       player.Username = username;
       _context.SaveChanges();

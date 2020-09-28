@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -23,8 +24,9 @@ namespace Pulse.Core.Authorization {
     }
 
     [HttpGet]
-    [Route("find")]
-    public ActionResult<bool> Find(string username) {
+    [Route("validate")]
+    public ActionResult<bool> Validate(string username) {
+      if (!username.All(char.IsLetterOrDigit)) return false;
       return _authService.FindPlayer(username);
     }
 
