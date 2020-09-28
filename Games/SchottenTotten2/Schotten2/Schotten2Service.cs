@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Pulse.Core.AppErrors;
+using Pulse.Games.SchottenTotten2.Cards;
 using Pulse.Games.SchottenTotten2.Game;
 using Pulse.Games.SchottenTotten2.Storage;
 
@@ -77,9 +78,13 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public Schotten2Game Exit(string matchId, string playerId, GameEvent exitType) {
       var game = _storage.LoadGame(matchId);
 
-      if (playerId == game.AttackerId) game.WinnerId = game.DefenderId;
-      else if (playerId == game.DefenderId) game.WinnerId = game.AttackerId;
-      else throw new ForbiddenException("Only players in the game can resign.");
+      if (playerId == game.AttackerId) {
+        game.State.AttackerCards = new List<Card>();
+        game.WinnerId = game.DefenderId;
+      } else if (playerId == game.DefenderId) {
+        game.State.DefenderCards = new List<Card>();
+        game.WinnerId = game.AttackerId;
+      } else throw new ForbiddenException("Only players in the game can resign.");
       var state = game.State;
 
       _storage.UpdateGame(game.MatchId, state);

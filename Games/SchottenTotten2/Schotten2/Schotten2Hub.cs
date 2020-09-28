@@ -39,15 +39,21 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public void PlayCard(int sectionIndex, int handIndex) {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
-      Console.WriteLine($"Play Card: Section {sectionIndex}, Card {handIndex}, Player {playerId}, Match {matchId}");
       var game = _service.PlayCard(matchId, playerId, sectionIndex, handIndex);
       SendState(game, sectionIndex);
+    }
+
+    public void Resign() {
+      var playerId = GetPlayerId();
+      var matchId = GetMatchId();
+      Console.WriteLine($"Resign: {playerId}");
+      var game = _service.Exit(matchId, playerId, Game.GameEvent.Resigned);
+      SendState(game);
     }
 
     public void Retreat(int sectionIndex) {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
-      Console.WriteLine($"Retreat: Section {sectionIndex}, Player {playerId}, Match {matchId}");
       var game = _service.Retreat(matchId, playerId, sectionIndex);
       SendState(game, sectionIndex);
     }
@@ -55,12 +61,11 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public void UseOil(int sectionIndex) {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
-      Console.WriteLine($"Use Oil: Section {sectionIndex}, Player {playerId}, Match {matchId}");
       var game = _service.UseOil(matchId, playerId, sectionIndex);
       SendState(game, sectionIndex);
     }
 
-    private Task SendState(Schotten2Game game, int sectionIndex) {
+    private Task SendState(Schotten2Game game, int sectionIndex = -1) {
       Clients.User(game.AttackerId).UpdateState(_service.MapResponse(game, game.AttackerId, sectionIndex));
       Clients.User(game.DefenderId).UpdateState(_service.MapResponse(game, game.DefenderId, sectionIndex));
       return Task.CompletedTask;
