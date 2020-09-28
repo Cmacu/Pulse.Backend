@@ -103,9 +103,9 @@ namespace Pulse.Games.SchottenTotten2.Game {
       if (state.SiegeCards.Count != 0) {
         hand[handIndex] = _cardService.DrawCard(state.SiegeCards);
         state.NewCards = 1;
-        state.EnablePreparation = true;
       }
       state.IsAttackersTurn = !state.IsAttackersTurn;
+      state.EnablePreparation = state.IsAttackersTurn || state.OilCount > 0;
 
       return state;
     }
