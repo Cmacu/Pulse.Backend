@@ -14,5 +14,6 @@ namespace Pulse.Games.SchottenTotten2.Game {
     public List<Card> SiegeCards { get; set; }
     public List<Card> DiscardCards { get; set; }
     public GameEvent LastEvent { get; set; }
+    public int LastSection { get; set; }
   }
 }

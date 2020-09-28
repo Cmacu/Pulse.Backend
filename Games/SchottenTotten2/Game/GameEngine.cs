@@ -41,6 +41,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
         DefenderCards = defenderCards,
         DiscardCards = new List<Card>(),
         LastEvent = GameEvent.Start,
+        LastSection = -1,
       };
       return state;
     }
@@ -52,6 +53,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
       state.NewCards = 0;
       state.EnablePreparation = true;
       state.LastEvent = GameEvent.Retreat;
+      state.LastSection = sectionIndex;
       return state;
     }
 
@@ -74,6 +76,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
       state.OilCount--;
       state.EnablePreparation = false;
       state.LastEvent = GameEvent.UseOil;
+      state.LastSection = sectionIndex;
 
       return state;
     }
@@ -86,10 +89,13 @@ namespace Pulse.Games.SchottenTotten2.Game {
       var formation = state.IsAttackersTurn ? section.Attack : section.Defense;
       if (formation.Count >= section.Spaces) throw new ForbiddenException("Formation capacity reached.");
 
-      state.LastEvent = GameEvent.PlayCard;
+      state.LastSection = sectionIndex;
       var card = hand[handIndex];
       if (!HandleArchenemies(card, state.IsAttackersTurn ? section.Defense : section.Attack, state.DiscardCards)) {
+        state.LastEvent = GameEvent.PlayCard;
         formation.Add(card);
+      } else {
+        state.LastEvent = GameEvent.Eliminate;
       }
 
       if (CheckControl(state)) {
@@ -117,6 +123,8 @@ namespace Pulse.Games.SchottenTotten2.Game {
       for (var i = 0; i < state.Sections.Count; i++) {
         var section = state.Sections[i];
         if (!section.CanDefend(extraCards)) {
+          state.LastSection = i;
+          state.LastEvent = GameEvent.Damaged;
           if (section.IsDamaged || GetDamagedCount(state.Sections) == 3) return true;
           state.DiscardCards.AddRange(section.Attack);
           state.DiscardCards.AddRange(section.Defense);

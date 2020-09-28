@@ -40,7 +40,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
       var game = _service.PlayCard(matchId, playerId, sectionIndex, handIndex);
-      SendState(game, sectionIndex);
+      SendState(game);
     }
 
     public void Resign() {
@@ -55,19 +55,19 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
       var game = _service.Retreat(matchId, playerId, sectionIndex);
-      SendState(game, sectionIndex);
+      SendState(game);
     }
 
     public void UseOil(int sectionIndex) {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
       var game = _service.UseOil(matchId, playerId, sectionIndex);
-      SendState(game, sectionIndex);
+      SendState(game);
     }
 
-    private Task SendState(Schotten2Game game, int sectionIndex = -1) {
-      Clients.User(game.AttackerId).UpdateState(_service.MapResponse(game, game.AttackerId, sectionIndex));
-      Clients.User(game.DefenderId).UpdateState(_service.MapResponse(game, game.DefenderId, sectionIndex));
+    private Task SendState(Schotten2Game game) {
+      Clients.User(game.AttackerId).UpdateState(_service.MapResponse(game, game.AttackerId));
+      Clients.User(game.DefenderId).UpdateState(_service.MapResponse(game, game.DefenderId));
       return Task.CompletedTask;
     }
 

@@ -92,7 +92,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       return game;
     }
 
-    public Schotten2Response MapResponse(Schotten2Game game, string playerId, int sectionIndex = -1) {
+    public Schotten2Response MapResponse(Schotten2Game game, string playerId) {
       var isAttacker = playerId == game.AttackerId;
       var state = game.State;
       var isCurrentPlayer = (isAttacker && state.IsAttackersTurn) || (!isAttacker && !state.IsAttackersTurn);
@@ -100,7 +100,6 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
         IsAttacker = isAttacker,
         IsCurrentPlayer = isCurrentPlayer,
         EnablePreparation = isCurrentPlayer && state.EnablePreparation,
-        ActiveSectionIndex = sectionIndex,
         NewCards = state.NewCards,
         OilCount = state.OilCount,
         Sections = state.Sections,
@@ -109,6 +108,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
         SiegeCardsCount = state.SiegeCards.Count,
         DiscardCards = state.DiscardCards,
         LastEvent = state.LastEvent.ToString("F"),
+        LastSection = state.LastSection,
       };
       return model;
     }

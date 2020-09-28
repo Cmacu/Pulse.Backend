@@ -11,8 +11,14 @@ namespace Pulse.Games.SchottenTotten2.Game {
     [Description("used oil")]
     UseOil,
 
-    [Description("send troops")]
+    [Description("eleminated")]
+    Eliminate,
+
+    [Description("played card")]
     PlayCard,
+
+    [Description("damaged")]
+    Damaged,
 
     [Description("expired")]
     Expired,
