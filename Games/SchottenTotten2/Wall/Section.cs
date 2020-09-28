@@ -64,7 +64,7 @@ namespace Pulse.Games.SchottenTotten2.Wall {
     public List<Card> SortFormation(List<Card> cards) {
       var sorted = new List<Card>();
       sorted.AddRange(cards);
-      sorted.Sort((x, y) => y.Rank - x.Rank);
+      sorted.Sort((x, y) => x.Rank - y.Rank);
       return sorted;
     }
 
@@ -73,19 +73,19 @@ namespace Pulse.Games.SchottenTotten2.Wall {
       formation = SortFormation(formation);
       foreach (var formationType in Types) {
         if (formationType == FormationType.SUIT_RUN && CheckSuit(formation) && CheckRun(formation)) {
-          return (int) FormationType.SUIT_RUN + sum;
+          return (double) FormationType.SUIT_RUN + sum;
         }
         if (formationType == FormationType.SAME_RANK && CheckRank(formation)) {
-          return (int) FormationType.SAME_RANK + sum;
+          return (double) FormationType.SAME_RANK + sum;
         }
         if (formationType == FormationType.SAME_SUIT && CheckSuit(formation)) {
-          return (int) FormationType.SAME_SUIT + sum;
+          return (double) FormationType.SAME_SUIT + sum;
         }
         if (formationType == FormationType.RUN && CheckRun(formation)) {
-          return (int) FormationType.RUN + sum;
+          return (double) FormationType.RUN + sum;
         }
         if (formationType == FormationType.LOW_SUM) {
-          return (int) FormationType.LOW_SUM - sum;
+          return (double) FormationType.LOW_SUM - sum;
         }
       }
       return sum;
