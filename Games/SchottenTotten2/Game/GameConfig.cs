@@ -42,7 +42,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
         case SectionStyle.Door:
           if (isDamaged) {
             cardSpaces = 4;
-            formationTypes.Add(FormationType.LOW_SUM);
+            formationTypes = new List<FormationType>() { FormationType.LOW_SUM };
           } else {
             cardSpaces = 2;
           }
