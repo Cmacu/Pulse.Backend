@@ -23,10 +23,14 @@ namespace Pulse.Games.SchottenTotten2.Game {
       switch (style) {
         case SectionStyle.RightPit:
           cardSpaces = 3;
-          formationTypes = new List<FormationType>() { isDamaged ? FormationType.RUN : FormationType.LOW_SUM };
+          formationTypes = isDamaged ?
+            new List<FormationType>() { FormationType.RUN, FormationType.SUM } :
+            new List<FormationType>() { FormationType.LOW_SUM };
           break;
         case SectionStyle.LeftPit:
-          formationTypes = new List<FormationType>() { isDamaged ? FormationType.RUN : FormationType.SUM };
+          formationTypes = isDamaged ?
+            new List<FormationType>() { FormationType.RUN, FormationType.SUM } :
+            new List<FormationType>() { FormationType.SUM };
           break;
         case SectionStyle.Tower:
           if (isDamaged) {

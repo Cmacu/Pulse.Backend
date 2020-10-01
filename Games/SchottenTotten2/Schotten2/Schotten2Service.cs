@@ -42,6 +42,16 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       return game;
     }
 
+    public Card GetHandCard(string matchId, string playerId, int handIndex, out string opponentId) {
+      var game = _storage.LoadGame(matchId);
+      opponentId = game.AttackerId == playerId ? game.DefenderId : game.AttackerId;
+      if (game.State.IsAttackersTurn && game.AttackerId != playerId) throw new ForbiddenException("It's attacker's turn to play.");
+      if (!game.State.IsAttackersTurn && game.DefenderId != playerId) throw new ForbiddenException("It's defenders's turn to play.");
+      var hand = game.State.IsAttackersTurn ? game.State.AttackerCards : game.State.DefenderCards;
+      if (handIndex >= hand.Count) throw new ForbiddenException("Invalid Hand Card.");
+      return hand[handIndex];
+    }
+
     public Schotten2Game PlayCard(string matchId, string playerId, int sectionIndex, int handIndex) {
       var game = _storage.LoadGame(matchId);
 

@@ -57,17 +57,6 @@ namespace Pulse.Games.SchottenTotten2.Game {
       return state;
     }
 
-    private List<Section> CreateSections() {
-      var leftPit = _config.GetSection(SectionStyle.LeftPit);
-      var leftWall = _config.GetSection(SectionStyle.Wall);
-      var leftTower = _config.GetSection(SectionStyle.Tower);
-      var door = _config.GetSection(SectionStyle.Door);
-      var rightTower = _config.GetSection(SectionStyle.Tower);
-      var rightWall = _config.GetSection(SectionStyle.Wall);
-      var rightPit = _config.GetSection(SectionStyle.RightPit);
-      return new List<Section>() { leftPit, leftTower, leftWall, door, rightWall, rightTower, rightPit };
-    }
-
     public GameState UseOil(GameState state, int sectionIndex) {
       var oilIndex = _config.OilIndex;
       var cards = state.Sections[sectionIndex].Attack;
@@ -116,20 +105,35 @@ namespace Pulse.Games.SchottenTotten2.Game {
       return state;
     }
 
+    private List<Section> CreateSections() {
+      var leftPit = _config.GetSection(SectionStyle.LeftPit);
+      var leftWall = _config.GetSection(SectionStyle.Wall);
+      var leftTower = _config.GetSection(SectionStyle.Tower);
+      var door = _config.GetSection(SectionStyle.Door);
+      var rightTower = _config.GetSection(SectionStyle.Tower);
+      var rightWall = _config.GetSection(SectionStyle.Wall);
+      var rightPit = _config.GetSection(SectionStyle.RightPit);
+      return new List<Section>() { leftPit, leftTower, leftWall, door, rightWall, rightTower, rightPit };
+    }
+
     private bool CheckControl(GameState state) {
       var extraCards = new List<Card>(state.DefenderCards);
       extraCards.AddRange(state.SiegeCards);
       extraCards = state.Sections[0].SortFormation(extraCards);
       for (var i = 0; i < state.Sections.Count; i++) {
         var section = state.Sections[i];
-        if (!section.CanDefend(extraCards)) {
-          state.LastSection = i;
-          state.LastEvent = GameEvent.Damaged;
-          if (section.IsDamaged || GetDamagedCount(state.Sections) == 3) return true;
-          state.DiscardCards.AddRange(section.Attack);
-          state.DiscardCards.AddRange(section.Defense);
-          state.Sections[i] = _config.GetSection(section.Style, true);
-        }
+        if (section.CanDefend(extraCards)) continue;
+
+        state.LastSection = i;
+        state.LastEvent = GameEvent.Damaged;
+
+        if (section.IsDamaged) return true;
+
+        state.DiscardCards.AddRange(section.Attack);
+        state.DiscardCards.AddRange(section.Defense);
+        state.Sections[i] = _config.GetSection(section.Style, true);
+
+        if (GetDamagedCount(state.Sections) >= 4) return true;
       }
       return false;
     }

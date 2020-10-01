@@ -28,7 +28,6 @@ namespace Pulse.Matchmaker.Matches {
     }
 
     [HttpGet]
-    [Authorize]
     [Route("{matchId}")]
     public ActionResult<MatchResponse> Get(int matchId) {
       var match = _matchService.Find(matchId);

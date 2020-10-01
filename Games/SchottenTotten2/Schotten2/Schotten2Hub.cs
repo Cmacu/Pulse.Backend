@@ -11,6 +11,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
   public interface ISchotten2Hub {
     Task SendDisconnect(string message);
     Task UpdateState(Schotten2Response state);
+    Task PlayCard(SectionCard sectionCard);
   }
 
   [Authorize]
@@ -23,9 +24,8 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public override Task OnConnectedAsync() {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
-      // Console.WriteLine($"Player connected: {playerId} Match: {matchId}");
-      Groups.AddToGroupAsync(Context.ConnectionId, matchId);
       var game = _service.Load(matchId);
+      // Groups.AddToGroupAsync(Context.ConnectionId, matchId); // Handle spectators
       Clients.User(playerId).UpdateState(_service.MapResponse(game, playerId));
       return base.OnConnectedAsync();
     }
@@ -36,9 +36,19 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       return base.OnDisconnectedAsync(exception);
     }
 
+    public void CheckState(int siegeCardsCount) {
+      var playerId = GetPlayerId();
+      var matchId = GetMatchId();
+      var game = _service.Load(matchId);
+      if (game.State.SiegeCards.Count != siegeCardsCount) {
+        Clients.User(playerId).UpdateState(_service.MapResponse(game, playerId));
+      }
+    }
+
     public void PlayCard(int sectionIndex, int handIndex) {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
+      HandleSendCard(matchId, playerId, sectionIndex, handIndex);
       var game = _service.PlayCard(matchId, playerId, sectionIndex, handIndex);
       SendState(game);
     }
@@ -65,10 +75,23 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       SendState(game);
     }
 
-    private Task SendState(Schotten2Game game) {
+    private void HandleSendCard(string matchId, string playerId, int sectionIndex, int handIndex) {
+      var opponentId = "";
+      var card = _service.GetHandCard(matchId, playerId, handIndex, out opponentId);
+      var sectionCard = new SectionCard {
+        SectionIndex = sectionIndex,
+        Card = card,
+      };
+      SendPlayCard(sectionCard, opponentId);
+    }
+
+    private void SendState(Schotten2Game game) {
       Clients.User(game.AttackerId).UpdateState(_service.MapResponse(game, game.AttackerId));
       Clients.User(game.DefenderId).UpdateState(_service.MapResponse(game, game.DefenderId));
-      return Task.CompletedTask;
+    }
+
+    private void SendPlayCard(SectionCard sectionCard, string opponentId) {
+      Clients.User(opponentId).PlayCard(sectionCard);
     }
 
     private string GetPlayerId() {
