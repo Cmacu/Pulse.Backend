@@ -8,6 +8,8 @@ namespace Pulse.Games.SchottenTotten2.Storage {
     public string MatchId { get; set; }
     public string AttackerId { get; set; }
     public string DefenderId { get; set; }
+    public string ResignedId { get; set; }
+    public string ExpiredId { get; set; }
     public string WinnerId { get; set; }
     public GameState State { get; set; }
     public DateTime CreatedAt { get; set; }
