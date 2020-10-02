@@ -27,25 +27,16 @@ namespace Pulse.Games.SchottenTotten2.Storage {
       AddGame(matchId, attackerId, defenderId, state);
     }
 
-    public Task UpdateGame(string matchId, GameState state) {
-      var game = GetGame(matchId);
-      game.State = state;
+    public Task UpdateGame(Schotten2Game game) {
       game.UpdatedAt = DateTime.UtcNow;
-      if (string.IsNullOrEmpty(game.WinnerId)) {
-        _cache.SetGame(game);
-      } else {
-        CompleteGame(matchId);
-      }
+      if (game.State.LastEvent == GameEvent.Destroyed) game.WinnerId = game.AttackerId;
+      if (game.State.LastEvent == GameEvent.Defended) game.WinnerId = game.DefenderId;
+      _cache.SetGame(game);
       using(var scope = _scopeFactory.CreateScope()) {
         var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
         dataContext.Update(game);
         dataContext.SaveChanges();
       }
-      return Task.CompletedTask;
-    }
-
-    public Task CompleteGame(string matchId) {
-      _cache.RemoveGame(matchId);
       return Task.CompletedTask;
     }
 

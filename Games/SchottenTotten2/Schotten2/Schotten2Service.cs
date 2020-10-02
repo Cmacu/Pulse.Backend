@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Pulse.Core.AppErrors;
 using Pulse.Games.SchottenTotten2.Cards;
 using Pulse.Games.SchottenTotten2.Game;
@@ -17,6 +18,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public void Start(List<string> players, string matchId) {
       if (players.Count != 2) throw new ForbiddenException("Two players required to start a game!");
       var state = _engine.CreateGame();
+      state.CurrentPlayerId = players[0].ToString();
       _storage.CreateGame(matchId, players[0].ToString(), players[1].ToString(), state);
       _storage.SaveLog(matchId, state, GameEvent.Start);
     }
@@ -35,21 +37,12 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("Invalid Wall Section.");
       if (!game.State.EnablePreparation) throw new ForbiddenException("Retreat is only allowed during preparation.");
       // Perform action
-      var state = _engine.Retreat(game.State, sectionIndex);
+      game.State = _engine.Retreat(game.State, sectionIndex);
+      game.State.CurrentPlayerId = game.AttackerId;
       // Update state
-      _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, GameEvent.Retreat, playerId, sectionIndex);
+      _storage.UpdateGame(game);
+      _storage.SaveLog(game.MatchId, game.State, GameEvent.Retreat, playerId, sectionIndex);
       return game;
-    }
-
-    public Card GetHandCard(string matchId, string playerId, int handIndex, out string opponentId) {
-      var game = _storage.LoadGame(matchId);
-      opponentId = game.AttackerId == playerId ? game.DefenderId : game.AttackerId;
-      if (game.State.IsAttackersTurn && game.AttackerId != playerId) throw new ForbiddenException("It's attacker's turn to play.");
-      if (!game.State.IsAttackersTurn && game.DefenderId != playerId) throw new ForbiddenException("It's defenders's turn to play.");
-      var hand = game.State.IsAttackersTurn ? game.State.AttackerCards : game.State.DefenderCards;
-      if (handIndex >= hand.Count) throw new ForbiddenException("Invalid Hand Card.");
-      return hand[handIndex];
     }
 
     public Schotten2Game PlayCard(string matchId, string playerId, int sectionIndex, int handIndex) {
@@ -59,14 +52,50 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       if (!game.State.IsAttackersTurn && game.DefenderId != playerId) throw new ForbiddenException("It's defenders's turn to play.");
       if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("Invalid Wall Section.");
 
-      var state = _engine.PlayCard(game.State, sectionIndex, handIndex);
+      game.State = _engine.PlayCard(game.State, sectionIndex, handIndex);
+      game.State.CurrentPlayerId = null;
 
-      if (state.AttackerCards.Count == 0) game.WinnerId = game.DefenderId;
-      if (state.DefenderCards.Count == 0) game.WinnerId = game.AttackerId;
-
-      _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, GameEvent.PlayCard, playerId, sectionIndex, handIndex);
+      _storage.UpdateGame(game);
+      _storage.SaveLog(game.MatchId, game.State, GameEvent.PlayCard, playerId, sectionIndex, handIndex);
       return game;
+    }
+
+    public Schotten2Game CompleteTurn(string matchId, string playerId, int sectionIndex, int handIndex) {
+      var game = _storage.LoadGame(matchId);
+
+      if (game.State.IsAttackersTurn && game.AttackerId != playerId) throw new ForbiddenException("It's attacker's turn to play.");
+      if (!game.State.IsAttackersTurn && game.DefenderId != playerId) throw new ForbiddenException("It's defenders's turn to play.");
+      if (sectionIndex >= game.State.Sections.Count) throw new ForbiddenException("Invalid Wall Section.");
+      if (handIndex < 0 || handIndex > 6) throw new ForbiddenException("Invalid Hand Card.");
+
+      var isAttacker = game.AttackerId == playerId;
+
+      if (_engine.HandleArchenemies(game.State, sectionIndex, isAttacker)) {
+        return Complete(game, handIndex);
+      }
+
+      var extraCards = new List<Card>(game.State.DefenderCards.Where(x => x != null));
+      extraCards.AddRange(game.State.SiegeCards);
+      for (var i = 0; i < game.State.Sections.Count; i++) {
+        var section = game.State.Sections[i];
+        if (section.CanDefend(extraCards)) continue;
+        game.State.LastSection = i;
+        game.State.LastEvent = GameEvent.Damaged;
+        game.State.DiscardCards.AddRange(section.Attack);
+        game.State.DiscardCards.AddRange(section.Defense);
+
+        if (section.IsDamaged) {
+          section.Name = GameEvent.Destroyed.ToString("F");
+          game.State.LastEvent = GameEvent.Destroyed;
+          return Complete(game, handIndex);
+        }
+
+        game.State.Sections[i] = _engine.GetSection(section.Style, true, section.MaxTries);
+        _storage.UpdateGame(game);
+        _storage.SaveLog(game.MatchId, game.State, game.State.LastEvent, playerId, sectionIndex);
+      }
+
+      return Complete(game, handIndex);;
     }
 
     public Schotten2Game UseOil(string matchId, string playerId, int sectionIndex) {
@@ -78,10 +107,11 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       if (game.State.Sections[sectionIndex].Attack.Count == 0) throw new ForbiddenException("No attacker cards found on this section.");
       if (!game.State.EnablePreparation) throw new ForbiddenException("Using oil is only allowed during preparation.");
 
-      var state = _engine.UseOil(game.State, sectionIndex);
+      game.State = _engine.UseOil(game.State, sectionIndex);
+      game.State.CurrentPlayerId = game.DefenderId;
 
-      _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, GameEvent.UseOil, playerId, sectionIndex);
+      _storage.UpdateGame(game);
+      _storage.SaveLog(game.MatchId, game.State, GameEvent.UseOil, playerId, sectionIndex);
       return game;
     }
 
@@ -89,23 +119,32 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var game = _storage.LoadGame(matchId);
 
       if (playerId == game.AttackerId) {
-        game.State.AttackerCards = new List<Card>();
-        game.WinnerId = game.DefenderId;
+        game.State.LastEvent = GameEvent.Defended;
       } else if (playerId == game.DefenderId) {
-        game.State.DefenderCards = new List<Card>();
-        game.WinnerId = game.AttackerId;
-      } else throw new ForbiddenException("Only players in the game can resign.");
-      var state = game.State;
+        game.State.LastEvent = GameEvent.Destroyed;
+      } else throw new ForbiddenException("Only players in the game can complete.");
+      game.State.CurrentPlayerId = null;
+      game.ResignedId = playerId;
 
-      _storage.UpdateGame(game.MatchId, state);
-      _storage.SaveLog(game.MatchId, state, exitType, playerId);
+      _storage.UpdateGame(game);
+      _storage.SaveLog(game.MatchId, game.State, exitType, playerId);
       return game;
     }
 
     public Schotten2Response MapResponse(Schotten2Game game, string playerId) {
       var isAttacker = playerId == game.AttackerId;
+      var isDefender = playerId == game.DefenderId;
       var state = game.State;
-      var isCurrentPlayer = (isAttacker && state.IsAttackersTurn) || (!isAttacker && !state.IsAttackersTurn);
+      var isCurrentPlayer = playerId == game.State.CurrentPlayerId;
+
+      var handCards = new List<Card>();
+      if (isAttacker) handCards = state.AttackerCards;
+      else if (isDefender) handCards = state.DefenderCards;
+
+      var OpponentCardsCount = 0;
+      if (isAttacker) OpponentCardsCount = state.DefenderCards.Count;
+      else if (isDefender) OpponentCardsCount = state.AttackerCards.Count;
+
       var model = new Schotten2Response() {
         IsAttacker = isAttacker,
         IsCurrentPlayer = isCurrentPlayer,
@@ -113,14 +152,22 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
         NewCards = state.NewCards,
         OilCount = state.OilCount,
         Sections = state.Sections,
-        HandCards = isAttacker ? state.AttackerCards : state.DefenderCards,
-        OpponentCardsCount = (isAttacker ? state.DefenderCards : state.AttackerCards).Count,
+        HandCards = handCards,
+        OpponentCardsCount = OpponentCardsCount,
         SiegeCardsCount = state.SiegeCards.Count,
         DiscardCards = state.DiscardCards,
         LastEvent = state.LastEvent.ToString("F"),
         LastSection = state.LastSection,
       };
       return model;
+    }
+
+    private Schotten2Game Complete(Schotten2Game game, int handIndex) {
+      game.State = _engine.CompleteTurn(game.State, handIndex);
+      game.State.CurrentPlayerId = game.State.IsAttackersTurn ? game.AttackerId : game.DefenderId;
+      _storage.UpdateGame(game);
+      _storage.SaveLog(game.MatchId, game.State, game.State.LastEvent, game.State.CurrentPlayerId, game.State.LastSection, handIndex);
+      return game;
     }
 
   }

@@ -5,6 +5,7 @@ using Pulse.Games.SchottenTotten2.Wall;
 namespace Pulse.Games.SchottenTotten2.Game {
   public class GameState {
     public bool IsAttackersTurn { get; set; }
+    public string CurrentPlayerId { get; set; }
     public bool EnablePreparation { get; set; }
     public int NewCards { get; set; }
     public int OilCount { get; set; }

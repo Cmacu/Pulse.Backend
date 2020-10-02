@@ -37,7 +37,7 @@ namespace Pulse.Games.SchottenTotten2.Wall {
 
       if (_attackStrength == GetMaxStrength()) return false;
 
-      _extraCards = extraCards;
+      _extraCards = SortFormation(extraCards);
       if (Types[0] == FormationType.LOW_SUM) _extraCards.Reverse();
 
       _tryCounter = 0;
@@ -64,7 +64,7 @@ namespace Pulse.Games.SchottenTotten2.Wall {
     public List<Card> SortFormation(List<Card> cards) {
       var sorted = new List<Card>();
       sorted.AddRange(cards);
-      sorted.Sort((x, y) => x.Rank - y.Rank);
+      sorted.Sort((x, y) => x.Rank.CompareTo(y.Rank));
       return sorted;
     }
 

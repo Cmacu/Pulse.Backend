@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Net.Mime;
 using Pulse.Backend;
 using Pulse.Core.AppErrors;
 using Pulse.Games.SchottenTotten2.Cards;
@@ -78,45 +76,53 @@ namespace Pulse.Games.SchottenTotten2.Game {
       var formation = state.IsAttackersTurn ? section.Attack : section.Defense;
       if (formation.Count >= section.Spaces) throw new ForbiddenException("Formation capacity reached.");
 
-      state.LastSection = sectionIndex;
       var card = hand[handIndex];
-      if (!HandleArchenemies(card, state.IsAttackersTurn ? section.Defense : section.Attack, state.DiscardCards)) {
-        state.LastEvent = GameEvent.PlayCard;
-        formation.Add(card);
-      } else {
-        state.LastEvent = GameEvent.Eliminate;
+      formation.Add(card);
+      hand[handIndex] = null;
+      state.LastSection = sectionIndex;
+      state.LastEvent = GameEvent.PlayCard;
+
+      return state;
+    }
+
+    public GameState CompleteTurn(GameState state, int handIndex) {
+      if (state.LastEvent == GameEvent.Destroyed || state.LastEvent == GameEvent.Defended) {
+        return state;
       }
 
-      if (CheckControl(state)) {
-        state.DefenderCards = new List<Card>();
+      if (GetDamagedCount(state.Sections) >= 4) {
+        state.LastEvent = GameEvent.Destroyed;
         return state;
       }
+
       if (state.IsAttackersTurn && state.SiegeCards.Count == 0) {
-        state.AttackerCards = new List<Card>();
+        state.LastEvent = GameEvent.Defended;
         return state;
       }
+
       if (state.SiegeCards.Count != 0) {
+        var hand = state.IsAttackersTurn ? state.AttackerCards : state.DefenderCards;
         hand[handIndex] = _cardService.DrawCard(state.SiegeCards);
         state.NewCards = 1;
       }
       state.IsAttackersTurn = !state.IsAttackersTurn;
       state.EnablePreparation = state.IsAttackersTurn || state.OilCount > 0;
-
+      state.LastEvent = GameEvent.DrawCard;
       return state;
     }
 
     private List<Section> CreateSections() {
-      var leftPit = _config.GetSection(SectionStyle.LeftPit);
-      var leftWall = _config.GetSection(SectionStyle.Wall);
-      var leftTower = _config.GetSection(SectionStyle.Tower);
-      var door = _config.GetSection(SectionStyle.Door);
-      var rightTower = _config.GetSection(SectionStyle.Tower);
-      var rightWall = _config.GetSection(SectionStyle.Wall);
-      var rightPit = _config.GetSection(SectionStyle.RightPit);
+      var leftPit = GetSection(SectionStyle.LeftPit);
+      var leftWall = GetSection(SectionStyle.Wall);
+      var leftTower = GetSection(SectionStyle.Tower);
+      var door = GetSection(SectionStyle.Door);
+      var rightTower = GetSection(SectionStyle.Tower);
+      var rightWall = GetSection(SectionStyle.Wall);
+      var rightPit = GetSection(SectionStyle.RightPit);
       return new List<Section>() { leftPit, leftTower, leftWall, door, rightWall, rightTower, rightPit };
     }
 
-    private bool CheckControl(GameState state) {
+    public bool CheckControl(GameState state) {
       var extraCards = new List<Card>(state.DefenderCards);
       extraCards.AddRange(state.SiegeCards);
       extraCards = state.Sections[0].SortFormation(extraCards);
@@ -131,7 +137,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
 
         state.DiscardCards.AddRange(section.Attack);
         state.DiscardCards.AddRange(section.Defense);
-        state.Sections[i] = _config.GetSection(section.Style, true);
+        state.Sections[i] = GetSection(section.Style, true);
 
         if (GetDamagedCount(state.Sections) >= 4) return true;
       }
@@ -146,16 +152,81 @@ namespace Pulse.Games.SchottenTotten2.Game {
       return count;
     }
 
-    private bool HandleArchenemies(Card card, List<Card> opponentFormation, List<Card> discardCards) {
-      var archenemy = _config.Archenemies.GetValueOrDefault(card.Rank.ToString());
-      if (archenemy == 0) return false;
-      var opposite = new Card() { Suit = card.Suit, Rank = archenemy };
+    public bool HandleArchenemies(GameState state, int sectionIndex, bool isAttacker) {
+      var section = state.Sections[sectionIndex];
+      var formation = isAttacker ? section.Attack : section.Defense;
+      if (formation.Count == 0) throw new ForbiddenException("Invalid section. Formation not found.");
+      var card = formation[formation.Count - 1];
+      var rank = card.Rank.ToString();
+      if (!_config.Archenemies.ContainsKey(rank)) return false;
 
-      if (!opponentFormation.Remove(opposite)) return false;
+      var opposite = _config.Archenemies.GetValueOrDefault(rank);
+      var archenemy = new Card() { Suit = card.Suit, Rank = opposite };
+      var opponent = isAttacker ? section.Defense : section.Attack;
 
-      discardCards.Add(card);
-      discardCards.Add(opposite);
+      if (!opponent.Remove(archenemy)) return false;
+
+      state.DiscardCards.Add(archenemy);
+      formation.Remove(card);
+      state.DiscardCards.Add(card);
+
+      state.LastEvent = GameEvent.Eliminate;
       return true;
+    }
+
+    public Section GetSection(SectionStyle style, bool isDamaged = false, int maxTries = 0) {
+      var cardSpaces = 3;
+      var formationTypes = new List<FormationType>() {
+        FormationType.SUIT_RUN,
+        FormationType.SAME_RANK,
+        FormationType.SAME_SUIT,
+        FormationType.RUN,
+        FormationType.SUM
+      };
+
+      switch (style) {
+        case SectionStyle.RightPit:
+          cardSpaces = 3;
+          formationTypes = isDamaged ?
+            new List<FormationType>() { FormationType.RUN, FormationType.SUM } :
+            new List<FormationType>() { FormationType.LOW_SUM };
+          break;
+        case SectionStyle.LeftPit:
+          formationTypes = isDamaged ?
+            new List<FormationType>() { FormationType.RUN, FormationType.SUM } :
+            new List<FormationType>() { FormationType.SUM };
+          break;
+        case SectionStyle.Tower:
+          if (isDamaged) {
+            cardSpaces = 2;
+            formationTypes = new List<FormationType>() {
+              FormationType.SAME_RANK,
+              FormationType.SUM,
+            };
+          } else {
+            cardSpaces = 4;
+          }
+          break;
+        case SectionStyle.Door:
+          if (isDamaged) {
+            cardSpaces = 4;
+            formationTypes = new List<FormationType>() { FormationType.LOW_SUM };
+          } else {
+            cardSpaces = 2;
+          }
+          break;
+      }
+
+      var section = new Section() {
+        Style = style,
+        Name = style.ToString("F"),
+        IsDamaged = isDamaged,
+        Spaces = cardSpaces,
+        Types = formationTypes,
+        MaxTries = maxTries,
+      };
+
+      return section;
     }
   }
 }

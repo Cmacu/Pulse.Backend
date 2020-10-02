@@ -17,13 +17,23 @@ namespace Pulse.Games.SchottenTotten2.Game {
     [Description("played card")]
     PlayCard,
 
+    [Description("completed their turn")]
+    DrawCard,
+
     [Description("damaged")]
     Damaged,
+
+    [Description("destroyed")]
+    Destroyed,
+
+    [Description("defended")]
+    Defended,
 
     [Description("expired")]
     Expired,
 
     [Description("resigned")]
-    Resigned
+    Resigned,
+
   }
 }

@@ -48,8 +48,9 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public void PlayCard(int sectionIndex, int handIndex) {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
-      HandleSendCard(matchId, playerId, sectionIndex, handIndex);
       var game = _service.PlayCard(matchId, playerId, sectionIndex, handIndex);
+      SendState(game);
+      game = _service.CompleteTurn(matchId, playerId, sectionIndex, handIndex);
       SendState(game);
     }
 
@@ -73,16 +74,6 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var matchId = GetMatchId();
       var game = _service.UseOil(matchId, playerId, sectionIndex);
       SendState(game);
-    }
-
-    private void HandleSendCard(string matchId, string playerId, int sectionIndex, int handIndex) {
-      var opponentId = "";
-      var card = _service.GetHandCard(matchId, playerId, handIndex, out opponentId);
-      var sectionCard = new SectionCard {
-        SectionIndex = sectionIndex,
-        Card = card,
-      };
-      SendPlayCard(sectionCard, opponentId);
     }
 
     private void SendState(Schotten2Game game) {
