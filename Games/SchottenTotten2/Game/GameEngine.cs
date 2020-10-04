@@ -86,17 +86,17 @@ namespace Pulse.Games.SchottenTotten2.Game {
     }
 
     public GameState CompleteTurn(GameState state, int handIndex) {
-      if (state.LastEvent == GameEvent.Destroyed || state.LastEvent == GameEvent.Defended) {
+      if (state.LastEvent == GameEvent.Destroy || state.LastEvent == GameEvent.Demolish || state.LastEvent == GameEvent.Defend) {
         return state;
       }
 
       if (GetDamagedCount(state.Sections) >= 4) {
-        state.LastEvent = GameEvent.Destroyed;
+        state.LastEvent = GameEvent.Demolish;
         return state;
       }
 
       if (state.IsAttackersTurn && state.SiegeCards.Count == 0) {
-        state.LastEvent = GameEvent.Defended;
+        state.LastEvent = GameEvent.Defend;
         return state;
       }
 
@@ -113,11 +113,11 @@ namespace Pulse.Games.SchottenTotten2.Game {
 
     private List<Section> CreateSections() {
       var leftPit = GetSection(SectionStyle.LeftPit);
-      var leftWall = GetSection(SectionStyle.Wall);
-      var leftTower = GetSection(SectionStyle.Tower);
-      var door = GetSection(SectionStyle.Door);
-      var rightTower = GetSection(SectionStyle.Tower);
-      var rightWall = GetSection(SectionStyle.Wall);
+      var leftTower = GetSection(SectionStyle.LeftTower);
+      var leftWall = GetSection(SectionStyle.LeftWall);
+      var door = GetSection(SectionStyle.Gate);
+      var rightWall = GetSection(SectionStyle.RightWall);
+      var rightTower = GetSection(SectionStyle.RightTower);
       var rightPit = GetSection(SectionStyle.RightPit);
       return new List<Section>() { leftPit, leftTower, leftWall, door, rightWall, rightTower, rightPit };
     }
@@ -131,7 +131,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
         if (section.CanDefend(extraCards)) continue;
 
         state.LastSection = i;
-        state.LastEvent = GameEvent.Damaged;
+        state.LastEvent = GameEvent.Damage;
 
         if (section.IsDamaged) return true;
 
@@ -170,6 +170,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
       formation.Remove(card);
       state.DiscardCards.Add(card);
 
+      state.LastSection = sectionIndex;
       state.LastEvent = GameEvent.Eliminate;
       return true;
     }
@@ -196,7 +197,8 @@ namespace Pulse.Games.SchottenTotten2.Game {
             new List<FormationType>() { FormationType.RUN, FormationType.SUM } :
             new List<FormationType>() { FormationType.SUM };
           break;
-        case SectionStyle.Tower:
+        case SectionStyle.LeftTower:
+        case SectionStyle.RightTower:
           if (isDamaged) {
             cardSpaces = 2;
             formationTypes = new List<FormationType>() {
@@ -207,7 +209,16 @@ namespace Pulse.Games.SchottenTotten2.Game {
             cardSpaces = 4;
           }
           break;
-        case SectionStyle.Door:
+        case SectionStyle.LeftWall:
+        case SectionStyle.RightWall:
+          if (isDamaged) {
+            formationTypes = new List<FormationType>() {
+              FormationType.SAME_SUIT,
+              FormationType.SUM,
+            };
+          }
+          break;
+        case SectionStyle.Gate:
           if (isDamaged) {
             cardSpaces = 4;
             formationTypes = new List<FormationType>() { FormationType.LOW_SUM };

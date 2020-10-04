@@ -58,7 +58,7 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       var playerId = GetPlayerId();
       var matchId = GetMatchId();
       Console.WriteLine($"Resign: {playerId}");
-      var game = _service.Exit(matchId, playerId, Game.GameEvent.Resigned);
+      var game = _service.Exit(matchId, playerId, Game.GameEvent.Resign);
       SendState(game);
     }
 

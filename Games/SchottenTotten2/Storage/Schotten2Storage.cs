@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,14 +24,15 @@ namespace Pulse.Games.SchottenTotten2.Storage {
     }
 
     public void CreateGame(string matchId, string attackerId, string defenderId, GameState state) {
-      _cache.Purge(DateTime.Now.AddHours(-2));
+      _cache.Purge(DateTime.Now.AddHours(-1));
       AddGame(matchId, attackerId, defenderId, state);
     }
 
     public Task UpdateGame(Schotten2Game game) {
       game.UpdatedAt = DateTime.UtcNow;
-      if (game.State.LastEvent == GameEvent.Destroyed) game.WinnerId = game.AttackerId;
-      if (game.State.LastEvent == GameEvent.Defended) game.WinnerId = game.DefenderId;
+      if (game.State.LastEvent == GameEvent.Destroy) game.WinnerId = game.AttackerId;
+      if (game.State.LastEvent == GameEvent.Demolish) game.WinnerId = game.AttackerId;
+      if (game.State.LastEvent == GameEvent.Defend) game.WinnerId = game.DefenderId;
       _cache.SetGame(game);
       using(var scope = _scopeFactory.CreateScope()) {
         var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
@@ -90,10 +92,18 @@ namespace Pulse.Games.SchottenTotten2.Storage {
       return Task.CompletedTask;
     }
 
+    private Schotten2Game ReadGame(string matchId) {
+      return _context.Schotten2Games.FirstOrDefault(x => x.MatchId == matchId);
+    }
+
+    public List<Schotten2Log> GetLogs(string matchId) {
+      return _context.Schotten2Logs.Where(x => x.MatchId == matchId).OrderBy(x => x.Timestamp).ToList();
+    }
+
     private Schotten2Game GetGame(string matchId) {
       var game = _cache.GetGame(matchId);
       if (game != null) return game;
-      game = _context.Schotten2Games.FirstOrDefault(x => x.MatchId == matchId);
+      game = ReadGame(matchId);
       if (game == null) throw new NotFoundException($"Game {matchId} not found!");
       if (string.IsNullOrEmpty(game.WinnerId)) {
         _cache.SetGame(game);
