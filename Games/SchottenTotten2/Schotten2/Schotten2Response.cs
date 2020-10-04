@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Pulse.Games.SchottenTotten2.Cards;
+using Pulse.Games.SchottenTotten2.Storage;
 using Pulse.Games.SchottenTotten2.Wall;
 
 namespace Pulse.Games.SchottenTotten2.Schotten2 {
@@ -14,7 +15,9 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
     public int SiegeCardsCount { get; set; }
     public int OpponentCardsCount { get; set; }
     public List<Card> DiscardCards { get; set; }
+    public Schotten2Role LastPlayer { get; set; }
     public string LastEvent { get; set; }
     public int LastSection { get; set; }
+    public string GameOver { get; set; }
   }
 }
