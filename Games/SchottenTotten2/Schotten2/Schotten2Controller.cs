@@ -69,9 +69,9 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
     [HttpGet]
     [Route("log")]
-    public ActionResult<List<Schotten2Response>> Log(string matchId) {
+    public ActionResult<List<Schotten2Response>> Log(string matchId, int skip) {
       var playerId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-      return _service.GetLogs(matchId, playerId);
+      return _service.GetLogs(matchId, playerId, skip);
     }
   }
 }

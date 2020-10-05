@@ -96,8 +96,8 @@ namespace Pulse.Games.SchottenTotten2.Storage {
       return _context.Schotten2Games.FirstOrDefault(x => x.MatchId == matchId);
     }
 
-    public List<Schotten2Log> GetLogs(string matchId) {
-      return _context.Schotten2Logs.Where(x => x.MatchId == matchId).OrderBy(x => x.Timestamp).ToList();
+    public List<Schotten2Log> GetLogs(string matchId, int skip) {
+      return _context.Schotten2Logs.Where(x => x.MatchId == matchId).OrderBy(x => x.Timestamp).Skip(skip).ToList();
     }
 
     private Schotten2Game GetGame(string matchId) {

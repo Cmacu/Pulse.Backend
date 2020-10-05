@@ -64,9 +64,9 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
       return game;
     }
 
-    public List<Schotten2Response> GetLogs(string matchId, string playerId) {
+    public List<Schotten2Response> GetLogs(string matchId, string playerId, int skip) {
       var game = _storage.LoadGame(matchId);
-      var logs = _storage.GetLogs(matchId);
+      var logs = _storage.GetLogs(matchId, skip);
       var response = new List<Schotten2Response>();
       foreach (var log in logs) {
         game.State = log.State;
@@ -115,10 +115,10 @@ namespace Pulse.Games.SchottenTotten2.Schotten2 {
 
     private Schotten2Game Complete(Schotten2Game game, GameState state, int handIndex) {
       game.State = _engine.CompleteTurn(game.State, handIndex);
-      game.State.LastPlayer = game.State.LastPlayer;
       game.State.CurrentPlayerId = game.State.IsAttackersTurn ? game.AttackerId : game.DefenderId;
       _storage.UpdateGame(game);
-      _storage.SaveLog(game.MatchId, game.State, game.State.LastEvent, game.State.CurrentPlayerId, game.State.LastSection, handIndex);
+      if (game.State.LastEvent != GameEvent.PlayCard)
+        _storage.SaveLog(game.MatchId, state, game.State.LastEvent, game.State.CurrentPlayerId, game.State.LastSection, handIndex);
       return game;
     }
 

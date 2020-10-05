@@ -86,7 +86,11 @@ namespace Pulse.Games.SchottenTotten2.Game {
     }
 
     public GameState CompleteTurn(GameState state, int handIndex) {
-      if (state.LastEvent == GameEvent.Destroy || state.LastEvent == GameEvent.Demolish || state.LastEvent == GameEvent.Defend) {
+      if (
+        state.LastEvent == GameEvent.Destroy ||
+        state.LastEvent == GameEvent.Demolish ||
+        state.LastEvent == GameEvent.Defend
+      ) {
         return state;
       }
 
@@ -107,7 +111,7 @@ namespace Pulse.Games.SchottenTotten2.Game {
       }
       state.IsAttackersTurn = !state.IsAttackersTurn;
       state.EnablePreparation = state.IsAttackersTurn || state.OilCount > 0;
-      state.LastEvent = GameEvent.DrawCard;
+      // state.LastEvent = GameEvent.DrawCard;
       return state;
     }
 
